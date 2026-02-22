@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CJX — Communication Junction Exchange</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800;9..40,900&display=swap');
+
+:root {
+  --bg: #0a0e17;
+  --bg-subtle: #111827;
+  --surface: #1a2236;
+  --border: #2a3550;
+  --text: #e8ecf4;
+  --text-muted: #8896b3;
+  --accent: #38bdf8;
+  --accent-dark: #0ea5e9;
+  --accent-glow: rgba(56, 189, 248, 0.15);
+  --emerald: #34d399;
+  --amber: #fbbf24;
+  --rose: #f43f5e;
+  --violet: #a78bfa;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 9999;
+}
+
+.grid-bg {
+  position: fixed; inset: 0;
+  background-image: linear-gradient(rgba(56,189,248,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,.03) 1px, transparent 1px);
+  background-size: 60px 60px; pointer-events: none;
+}
+.glow-orb { position:fixed;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(56,189,248,.08) 0%,transparent 70%);pointer-events:none;top:-200px;right:-100px;animation:orbFloat 20s ease-in-out infinite; }
+.glow-orb-2 { position:fixed;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(167,139,250,.06) 0%,transparent 70%);pointer-events:none;bottom:-200px;left:-100px;animation:orbFloat 25s ease-in-out infinite reverse; }
+@keyframes orbFloat { 0%,100%{transform:translate(0,0)} 50%{transform:translate(40px,30px)} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:translateY(0)} }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+@keyframes pulseGlow { 0%,100%{box-shadow:0 0 20px rgba(56,189,248,.2)} 50%{box-shadow:0 0 40px rgba(56,189,248,.4)} }
+
+.anim { animation:fadeUp .8s ease-out forwards; opacity:0; }
+.d1{animation-delay:.1s}.d2{animation-delay:.2s}.d3{animation-delay:.3s}.d4{animation-delay:.4s}.d5{animation-delay:.5s}.d6{animation-delay:.6s}
+
+/* ICON BASE */
+.ic { width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0; }
+.ic-s { width:18px;height:18px; }
+.ic-f { width:26px;height:26px; }
+.ic-l { width:28px;height:28px; }
+
+/* CJX LOGO — matches app: C=white/font-black j=sky-400/font-bold X=sky-500/font-black */
+.cjx { letter-spacing:-.04em; font-weight:900; display:inline-block; }
+.cjx .c { color:#fff; }
+.cjx .j { color:#38bdf8; font-weight:800; }
+.cjx .x { color:#0ea5e9; }
+
+/* NAV */
+nav { position:fixed;top:0;width:100%;z-index:100;padding:1.1rem 3rem;display:flex;align-items:center;justify-content:space-between;background:rgba(10,14,23,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border); }
+nav .cjx { font-size:1.75rem; }
+.nr { display:flex;gap:1.75rem;align-items:center; }
+.nr a.nl { color:var(--text-muted);text-decoration:none;font-size:.875rem;font-weight:500;transition:color .2s; }
+.nr a.nl:hover { color:var(--text); }
+
+/* BUTTONS */
+.btn { display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.5rem;font-weight:700;font-size:.85rem;border-radius:.7rem;border:none;cursor:pointer;transition:all .2s;text-decoration:none;font-family:inherit;line-height:1; }
+.btn-p { background:var(--accent);color:var(--bg); }
+.btn-p:hover { background:#7dd3fc;transform:translateY(-1px);box-shadow:0 8px 30px rgba(56,189,248,.3); }
+.btn-o { background:transparent;color:var(--text);border:1px solid var(--border); }
+.btn-o:hover { border-color:var(--accent);color:var(--accent);background:var(--accent-glow); }
+.btn-login { background:rgba(56,189,248,.1);color:var(--accent);border:1px solid rgba(56,189,248,.25); }
+.btn-login:hover { background:rgba(56,189,248,.2); }
+
+/* HERO */
+.hero { min-height:100vh;display:flex;align-items:center;padding:8rem 4rem 4rem;position:relative; }
+.hero-c { max-width:660px; }
+.badge { display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1rem;background:var(--accent-glow);border:1px solid rgba(56,189,248,.2);border-radius:100px;font-size:.8rem;font-weight:700;color:var(--accent);margin-bottom:2rem; }
+.badge .dot { width:6px;height:6px;background:var(--emerald);border-radius:50%;animation:pulseGlow 2s infinite; }
+.hero h1 { font-size:4.1rem;line-height:1.08;font-weight:900;margin-bottom:1.5rem;letter-spacing:-.03em; }
+.hero h1 .hl { color:var(--accent); }
+.hero .sub { font-size:1.15rem;line-height:1.7;color:var(--text-muted);max-width:520px;margin-bottom:2.5rem; }
+.ha { display:flex;gap:1rem;align-items:center; }
+.hv { position:absolute;right:4rem;top:50%;transform:translateY(-50%);width:470px; }
+
+/* MOCKUP */
+.mk { background:var(--surface);border-radius:1rem;border:1px solid var(--border);overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.4),0 0 60px rgba(56,189,248,.05);animation:float 6s ease-in-out infinite; }
+.mk-bar { padding:.7rem 1rem;background:var(--bg-subtle);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.5rem; }
+.mk-dot { width:8px;height:8px;border-radius:50%; }
+.mk-body { padding:1rem; }
+.sr { display:flex;gap:.5rem;margin-bottom:.75rem; }
+.sc { flex:1;padding:.7rem;background:var(--bg);border-radius:.5rem;border:1px solid var(--border); }
+.sc .l { font-size:.58rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em; }
+.sc .v { font-size:1.2rem;font-weight:800;margin-top:.2rem; }
+.ml { display:flex;flex-direction:column;gap:.35rem; }
+.mi { display:flex;align-items:center;gap:.5rem;padding:.45rem .7rem;background:var(--bg);border-radius:.35rem;border:1px solid var(--border);font-size:.68rem; }
+.mi .nm { color:var(--text);font-weight:700;flex:1; }
+.tg { padding:.1rem .45rem;border-radius:100px;font-size:.58rem;font-weight:700; }
+.tg-g { background:rgba(52,211,153,.15);color:var(--emerald); }
+.tg-a { background:rgba(251,191,36,.15);color:var(--amber); }
+.tg-b { background:rgba(56,189,248,.15);color:var(--accent); }
+.sd { width:6px;height:6px;border-radius:50%; }
+
+/* SECTIONS */
+section { padding:6rem 4rem;position:relative; }
+.slbl { font-size:.75rem;text-transform:uppercase;letter-spacing:.15em;color:var(--accent);font-weight:800;margin-bottom:1rem; }
+.stitle { font-size:2.75rem;line-height:1.12;font-weight:900;margin-bottom:1.5rem;max-width:600px;letter-spacing:-.025em; }
+.sdesc { font-size:1.05rem;color:var(--text-muted);line-height:1.7;max-width:560px;margin-bottom:3rem; }
+
+/* FEATURES */
+.fg3 { display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;max-width:1200px;margin:0 auto; }
+.ft { padding:2rem;background:var(--surface);border:1px solid var(--border);border-radius:1rem;transition:all .3s;position:relative;overflow:hidden; }
+.ft::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;transition:opacity .3s; }
+.ft:hover { border-color:rgba(56,189,248,.3);transform:translateY(-4px);box-shadow:0 20px 40px rgba(0,0,0,.2); }
+.ft:hover::before { opacity:1; }
+.fi { width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem; }
+.ft h3 { font-size:1.1rem;font-weight:800;margin-bottom:.75rem; }
+.ft p { font-size:.9rem;color:var(--text-muted);line-height:1.6; }
+
+/* BUILT FOR */
+.bf { background:var(--bg-subtle);border-top:1px solid var(--border);border-bottom:1px solid var(--border); }
+.bfg { display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;max-width:1100px;margin:0 auto; }
+.bfl { display:flex;flex-direction:column;gap:1.5rem; }
+.bi { display:flex;gap:1rem;align-items:flex-start; }
+.bi .n { width:36px;height:36px;min-width:36px;border-radius:10px;background:var(--accent-glow);border:1px solid rgba(56,189,248,.2);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.85rem; }
+.bi h4 { font-weight:800;font-size:1rem;margin-bottom:.25rem; }
+.bi p { font-size:.875rem;color:var(--text-muted);line-height:1.5; }
+
+/* PRICING */
+.pg { display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;max-width:1000px;margin:0 auto; }
+.pc { padding:2.5rem;background:var(--surface);border:1px solid var(--border);border-radius:1rem;position:relative;transition:all .3s; }
+.pc.pop { border-color:var(--accent);box-shadow:0 0 40px rgba(56,189,248,.1); }
+.pc.pop::before { content:'MOST POPULAR';position:absolute;top:-12px;left:50%;transform:translateX(-50%);padding:.25rem 1rem;background:var(--accent);color:var(--bg);font-size:.65rem;font-weight:900;letter-spacing:.1em;border-radius:100px; }
+.pc h3 { font-size:1.2rem;font-weight:800;margin-bottom:.5rem; }
+.pc .amt { font-size:3rem;font-weight:900;margin-bottom:.25rem; }
+.pc .amt span { font-size:1rem;font-weight:500;color:var(--text-muted); }
+.pc .pd { font-size:.85rem;color:var(--text-muted);margin-bottom:2rem; }
+.pf { list-style:none;display:flex;flex-direction:column;gap:.7rem;margin-bottom:2rem; }
+.pf li { font-size:.875rem;color:var(--text-muted);display:flex;align-items:center;gap:.7rem; }
+
+/* CTA */
+.cta { text-align:center;padding:8rem 4rem; }
+.ctab { max-width:700px;margin:0 auto;padding:4rem;background:linear-gradient(135deg,var(--surface) 0%,rgba(56,189,248,.05) 100%);border:1px solid var(--border);border-radius:1.5rem;position:relative;overflow:hidden; }
+.ctab::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent); }
+.ctab h2 { font-size:2.75rem;font-weight:900;margin-bottom:1rem;letter-spacing:-.02em; }
+.ctab p { color:var(--text-muted);font-size:1.05rem;margin-bottom:2rem;line-height:1.6; }
+.ctaa { display:flex;gap:1rem;justify-content:center;flex-wrap:wrap; }
+
+/* FOOTER */
+footer { padding:3rem 4rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem; }
+footer p { color:var(--text-muted);font-size:.8rem; }
+footer a { color:var(--text-muted);text-decoration:none;font-size:.8rem;transition:color .2s; }
+footer a:hover { color:var(--accent); }
+
+/* MODAL */
+.mo { display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:200;align-items:center;justify-content:center;padding:2rem; }
+.mo.open { display:flex; }
+.md { background:var(--surface);border:1px solid var(--border);border-radius:1.25rem;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 40px 80px rgba(0,0,0,.5); }
+.mh { padding:1.5rem 2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between; }
+.mh h2 { font-size:1.2rem;font-weight:800; }
+.mx { background:none;border:none;color:var(--text-muted);cursor:pointer;padding:.25rem;transition:color .2s; }
+.mx:hover { color:var(--text); }
+.mb { padding:2rem; }
+.fg { margin-bottom:1.25rem; }
+.fg label { display:block;font-size:.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem; }
+.fg input,.fg select,.fg textarea { width:100%;padding:.7rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:.5rem;color:var(--text);font-size:.9rem;font-family:inherit;transition:border-color .2s;outline:none; }
+.fg input:focus,.fg select:focus,.fg textarea:focus { border-color:var(--accent); }
+.fg input::placeholder,.fg textarea::placeholder { color:#4a5578; }
+.fg textarea { resize:vertical;min-height:80px; }
+.fr { display:grid;grid-template-columns:1fr 1fr;gap:1rem; }
+.fok { text-align:center;padding:2rem 0; }
+.fok .oki { width:64px;height:64px;background:rgba(52,211,153,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem; }
+.fok h3 { font-size:1.2rem;font-weight:800;margin-bottom:.5rem; }
+.fok p { color:var(--text-muted);font-size:.9rem;line-height:1.5; }
+
+/* CHECK ICON for pricing */
+.ck { width:16px;height:16px;color:var(--emerald);flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round; }
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .hero{flex-direction:column;padding:7rem 2rem 3rem;text-align:center}
+  .hero h1{font-size:2.6rem}
+  .hero .sub{margin:0 auto 2rem}
+  .ha{justify-content:center;flex-wrap:wrap}
+  .hv{position:relative;right:auto;top:auto;transform:none;width:100%;max-width:460px;margin:3rem auto 0}
+  .fg3{grid-template-columns:1fr;max-width:500px}
+  .pg{grid-template-columns:1fr;max-width:400px}
+  .bfg{grid-template-columns:1fr}
+  section{padding:4rem 2rem}
+  nav{padding:1rem 1.5rem}
+  .nr{gap:1rem}
+  .hm{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="glow-orb"></div>
+<div class="glow-orb-2"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="cjx" style="font-size:1.75rem"><span class="c">C</span><span class="j">j</span><span class="x">X</span></div>
+  <div class="nr">
+    <a href="#features" class="nl hm">Features</a>
+    <a href="#built-for" class="nl hm">Why CJX</a>
+    <a href="#pricing" class="nl hm">Pricing</a>
+    <a href="#contact" class="nl hm">Contact</a>
+    <a href="https://cjx-frontend.vercel.app" class="btn btn-login">
+      <svg class="ic ic-s" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      Login
+    </a>
+    <a href="#" class="btn btn-p" onclick="openForm();return false">Get Started</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-c">
+    <div class="badge anim"><span class="dot"></span> Built for insurance agencies</div>
+    <h1 class="anim d1">Your agency's<br><span class="hl">entire phone system</span><br>in one place.</h1>
+    <p class="sub anim d2">CJX is the communication platform built specifically for insurance agencies. Calls, texts, quotes, notes, and CRM — unified in a single workspace your team actually wants to use.</p>
+    <div class="ha anim d3">
+      <a href="#" class="btn btn-p" onclick="openForm();return false">
+        <svg class="ic ic-s" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Get Started
+      </a>
+      <a href="#features" class="btn btn-o">See Features</a>
+    </div>
+  </div>
+
+  <div class="hv anim d4">
+    <div class="mk">
+      <div class="mk-bar">
+        <div class="mk-dot" style="background:#f43f5e"></div>
+        <div class="mk-dot" style="background:#fbbf24"></div>
+        <div class="mk-dot" style="background:#34d399"></div>
+        <span style="margin-left:.5rem;font-size:.7rem;color:var(--text-muted);font-weight:700">
+          <span class="cjx" style="font-size:.75rem"><span class="c">C</span><span class="j">j</span><span class="x">X</span></span> Dashboard
+        </span>
+      </div>
+      <div class="mk-body">
+        <div class="sr">
+          <div class="sc"><div class="l">Today's Calls</div><div class="v" style="color:var(--accent)">127</div></div>
+          <div class="sc"><div class="l">Messages</div><div class="v" style="color:var(--violet)">43</div></div>
+          <div class="sc"><div class="l">Active Quotes</div><div class="v" style="color:var(--amber)">8</div></div>
+        </div>
+        <div class="ml">
+          <div class="mi"><div class="sd" style="background:var(--emerald)"></div><span class="nm">Sarah Johnson</span><span class="tg tg-g">Auto + Home</span></div>
+          <div class="mi"><div class="sd" style="background:var(--amber)"></div><span class="nm">Mike Chen</span><span class="tg tg-a">BOP Quote</span></div>
+          <div class="mi"><div class="sd" style="background:var(--accent)"></div><span class="nm">Emily Rodriguez</span><span class="tg tg-b">Renewal</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="slbl anim">Features</div>
+  <div class="stitle anim d1">Everything your agency needs.<br>Nothing it doesn't.</div>
+  <div class="sdesc anim d2">Built by someone who actually works in an insurance agency. Every feature exists because it solves a real daily problem.</div>
+
+  <div class="fg3">
+    <div class="ft anim d1">
+      <div class="fi" style="background:rgba(56,189,248,.1);color:var(--accent)">
+        <svg class="ic ic-f" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </div>
+      <h3>WebRTC Calling</h3>
+      <p>Make and receive calls directly in the browser. No desk phones needed. Call logging, transfer, hold, and mute built in.</p>
+    </div>
+    <div class="ft anim d2">
+      <div class="fi" style="background:rgba(167,139,250,.1);color:var(--violet)">
+        <svg class="ic ic-f" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <h3>SMS Messaging</h3>
+      <p>Text clients from your agency number. Full conversation history, read receipts, and quick replies. No personal phones.</p>
+    </div>
+    <div class="ft anim d3">
+      <div class="fi" style="background:rgba(251,191,36,.1);color:var(--amber)">
+        <svg class="ic ic-f" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <h3>Quick Quote Queue</h3>
+      <p>Incoming quote requests land in a shared queue. Claim, assign, and track — no more lost sticky notes or email chains.</p>
+    </div>
+    <div class="ft anim d4">
+      <div class="fi" style="background:rgba(52,211,153,.1);color:var(--emerald)">
+        <svg class="ic ic-f" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+      </div>
+      <h3>Contact Notes</h3>
+      <p>Every call, every note, every policy detail — attached to the client. The next person who picks up the phone has full context.</p>
+    </div>
+    <div class="ft anim d5">
+      <div class="fi" style="background:rgba(244,63,94,.1);color:var(--rose)">
+        <svg class="ic ic-f" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <h3>Team Management</h3>
+      <p>See who's available, busy, or away. Internal calling and messaging. Role-based permissions for admins, agents, and staff.</p>
+    </div>
+    <div class="ft anim d6">
+      <div class="fi" style="background:rgba(56,189,248,.1);color:var(--accent)">
+        <svg class="ic ic-f" viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+      </div>
+      <h3>Activity Tracking</h3>
+      <p>Daily task lists, call history, bulletin boards. Know exactly what happened today — and what needs to happen tomorrow.</p>
+    </div>
+  </div>
+</section>
+
+<!-- BUILT FOR -->
+<section class="bf" id="built-for">
+  <div class="bfg">
+    <div>
+      <div class="slbl">Why CJX</div>
+      <div class="stitle">Built by an agency,<br>for agencies.</div>
+      <p class="sdesc" style="margin-bottom:0">Generic CRMs and phone systems weren't made for insurance. You end up paying for features you don't use and missing the ones you need. CJX is different.</p>
+    </div>
+    <div class="bfl">
+      <div class="bi"><div class="n">1</div><div><h4>No more app switching</h4><p>Phone system, texting, notes, quotes, and team chat — all in one tab. Your team stops wasting time bouncing between tools.</p></div></div>
+      <div class="bi"><div class="n">2</div><div><h4>Every screen does something</h4><p>No "nothing-screens." Every view is actionable. If you're looking at a contact, you can call, text, add notes, or pull up their policy — right there.</p></div></div>
+      <div class="bi"><div class="n">3</div><div><h4>Insurance-specific workflows</h4><p>Quote intake forms with HO, AUTO, BOP, BAP, CPP, Farm, PU, and CU policy types built in. We speak your language.</p></div></div>
+      <div class="bi"><div class="n">4</div><div><h4>Up and running in a day</h4><p>We handle setup personally. Port your number, configure your team, and train your staff. You're live by end of day.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div style="text-align:center;margin-bottom:3rem">
+    <div class="slbl" style="text-align:center">Pricing</div>
+    <div class="stitle" style="margin:0 auto 1rem;text-align:center;max-width:500px">Simple plans.<br>No surprises.</div>
+    <p style="color:var(--text-muted);max-width:500px;margin:0 auto;font-size:1rem">Every plan includes calling, texting, CRM, and unlimited support. Pick the size that fits your team.</p>
+  </div>
+
+  <div class="pg">
+    <div class="pc">
+      <h3>Starter</h3>
+      <div class="amt">$49<span>/mo</span></div>
+      <div class="pd">For small agencies up to 5 users</div>
+      <ul class="pf">
+        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Up to 5 users</li>
+        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>WebRTC calling</li>
+        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>SMS messaging</li>
+        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Contact notes &amp; CRM</li>
+        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Quote queue</li>
+        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Email support</li>
+      </ul>
+      <a href="#" class="btn btn-o" style="width:100%;justify-content:center" onclick="openForm();return false">Get Started</a>
+    </div>
+    <div class="pc pop">
+      <h3>Professional</h3>
+      <div class="amt">$99<span>/mo</span></div>
+      <div class="pd">For growing agencies up to 15 users</div>
+      <ul class="pf">
+        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Up to 15 users</li>
+        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Everything in Starter</li>
+        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Power dialer</li>
+        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Call recording</li>
+        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Advanced analytics</li>
+        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Priority support</li>
+      </ul>
+      <a href="#" class="btn btn-p" style="width:100%;justify-content:center" onclick="openForm();return false">Get Started</a>
+    </div>
+    <div class="pc">
+      <h3>Enterprise</h3>
+      <div class="amt">$199<span>/mo</span></div>
+      <div class="pd">For large agencies, unlimited users</div>
+      <ul class="pf">
+        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Unlimited users</li>
+        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Everything in Professional</li>
+        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Custom integrations</li>
+        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Dedicated account manager</li>
+        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Custom training</li>
+        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>SLA guarantee</li>
+      </ul>
+      <a href="#" class="btn btn-o" style="width:100%;justify-content:center" onclick="openForm();return false">Contact Us</a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="contact">
+  <div class="ctab">
+    <h2>Ready to simplify<br>your agency?</h2>
+    <p>Get set up in a single day. We handle the migration personally — port your number, configure your team, and get you live.</p>
+    <div class="ctaa">
+      <a href="mailto:christianslatimer@outlook.com" class="btn btn-p">
+        <svg class="ic ic-s" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        christianslatimer@outlook.com
+      </a>
+      <a href="tel:+16166996614" class="btn btn-o">
+        <svg class="ic ic-s" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        (616) 699-6614
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="cjx" style="font-size:1.25rem"><span class="c">C</span><span class="j">j</span><span class="x">X</span></div>
+  <p>&copy; 2026 CJX Enterprise LLC. All rights reserved.</p>
+  <div style="display:flex;gap:2rem">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="mailto:christianslatimer@outlook.com">Contact</a>
+  </div>
+</footer>
+
+<!-- INTEREST FORM MODAL -->
+<div class="mo" id="iModal">
+  <div class="md">
+    <div class="mh">
+      <h2>Get Started with <span class="cjx" style="font-size:1.2rem"><span class="c" style="color:#e8ecf4">C</span><span class="j">j</span><span class="x">X</span></span></h2>
+      <button class="mx" onclick="closeForm()">
+        <svg class="ic" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="mb" id="fC">
+      <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:1.5rem">Tell us about your agency and we'll reach out to get you set up.</p>
+      <div class="fr">
+        <div class="fg"><label>First Name *</label><input id="f1" placeholder="John"></div>
+        <div class="fg"><label>Last Name *</label><input id="f2" placeholder="Smith"></div>
+      </div>
+      <div class="fg"><label>Agency Name *</label><input id="f3" placeholder="Smith Insurance Agency"></div>
+      <div class="fr">
+        <div class="fg"><label>Work Email *</label><input id="f4" type="email" placeholder="john@smithinsurance.com"></div>
+        <div class="fg"><label>Phone Number *</label><input id="f5" placeholder="(555) 123-4567"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Number of Users</label><select id="f6"><option value="">Select...</option><option>1–5</option><option>6–10</option><option>11–15</option><option>16–25</option><option>25+</option></select></div>
+        <div class="fg"><label>Interested Plan</label><select id="f7"><option value="">Not sure yet</option><option>Starter ($49/mo)</option><option>Professional ($99/mo)</option><option>Enterprise ($199/mo)</option></select></div>
+      </div>
+      <div class="fg"><label>What's your biggest pain point?</label><textarea id="f8" placeholder="e.g. We use 5 different tools and nothing talks to each other..."></textarea></div>
+      <div class="fg"><label>How did you hear about CJX?</label><select id="f9"><option value="">Select...</option><option>Referral</option><option>Google Search</option><option>Social Media</option><option>Industry Event</option><option>Other</option></select></div>
+      <button class="btn btn-p" style="width:100%;justify-content:center;padding:.85rem;font-size:.95rem;margin-top:.5rem" onclick="submitForm()">
+        <svg class="ic ic-s" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Submit Interest
+      </button>
+    </div>
+    <div class="mb" id="fS" style="display:none">
+      <div class="fok">
+        <div class="oki">
+          <svg class="ic ic-l" style="color:var(--emerald)" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <h3>We'll be in touch!</h3>
+        <p>Thanks for your interest. We'll reach out within 24 hours to discuss your agency's needs and get you set up.</p>
+        <button class="btn btn-o" style="margin-top:1.5rem" onclick="closeForm()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.style.animationPlayState='running'})},{threshold:.1});
+document.querySelectorAll('.anim').forEach(e=>{e.style.animationPlayState='paused';obs.observe(e)});
+document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',function(e){if(this.getAttribute('href')==='#')return;e.preventDefault();const t=document.querySelector(this.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth',block:'start'})})});
+
+function openForm(){document.getElementById('iModal').classList.add('open');document.getElementById('fC').style.display='';document.getElementById('fS').style.display='none';document.body.style.overflow='hidden'}
+function closeForm(){document.getElementById('iModal').classList.remove('open');document.body.style.overflow=''}
+function submitForm(){
+  const v=id=>document.getElementById(id).value.trim();
+  if(!v('f1')||!v('f2')||!v('f3')||!v('f4')||!v('f5')){alert('Please fill in all required fields.');return}
+  console.log('Interest:',{name:v('f1')+' '+v('f2'),agency:v('f3'),email:v('f4'),phone:v('f5'),users:v('f6'),plan:v('f7'),pain:v('f8'),source:v('f9')});
+  document.getElementById('fC').style.display='none';document.getElementById('fS').style.display='';
+}
+document.getElementById('iModal').addEventListener('click',function(e){if(e.target===this)closeForm()});
+</script>
+
+</body>
+</html>
