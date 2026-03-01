@@ -3,481 +3,709 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CJX — Communication Junction Exchange</title>
+<title>CJX — The #1 Communication Platform for Insurance Agencies</title>
+<meta name="description" content="CJX unifies calling, texting, CRM, quoting, and team management into one powerful platform built exclusively for insurance agencies.">
+<meta property="og:title" content="CJX — Communication Platform for Insurance Agencies">
+<meta property="og:description" content="Calls, texts, quotes, notes, and CRM — unified in a single workspace.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800;9..40,900&display=swap');
-
-:root {
-  --bg: #0a0e17;
-  --bg-subtle: #111827;
-  --surface: #1a2236;
-  --border: #2a3550;
-  --text: #e8ecf4;
-  --text-muted: #8896b3;
-  --accent: #38bdf8;
-  --accent-dark: #0ea5e9;
-  --accent-glow: rgba(56, 189, 248, 0.15);
-  --emerald: #34d399;
-  --amber: #fbbf24;
-  --rose: #f43f5e;
-  --violet: #a78bfa;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-  font-family: 'DM Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-}
-
-body::before {
-  content: '';
-  position: fixed; inset: 0;
-  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events: none; z-index: 9999;
-}
-
-.grid-bg {
-  position: fixed; inset: 0;
-  background-image: linear-gradient(rgba(56,189,248,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,.03) 1px, transparent 1px);
-  background-size: 60px 60px; pointer-events: none;
-}
-.glow-orb { position:fixed;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(56,189,248,.08) 0%,transparent 70%);pointer-events:none;top:-200px;right:-100px;animation:orbFloat 20s ease-in-out infinite; }
-.glow-orb-2 { position:fixed;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(167,139,250,.06) 0%,transparent 70%);pointer-events:none;bottom:-200px;left:-100px;animation:orbFloat 25s ease-in-out infinite reverse; }
-@keyframes orbFloat { 0%,100%{transform:translate(0,0)} 50%{transform:translate(40px,30px)} }
-@keyframes fadeUp { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:translateY(0)} }
-@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-@keyframes pulseGlow { 0%,100%{box-shadow:0 0 20px rgba(56,189,248,.2)} 50%{box-shadow:0 0 40px rgba(56,189,248,.4)} }
-
-.anim { animation:fadeUp .8s ease-out forwards; opacity:0; }
-.d1{animation-delay:.1s}.d2{animation-delay:.2s}.d3{animation-delay:.3s}.d4{animation-delay:.4s}.d5{animation-delay:.5s}.d6{animation-delay:.6s}
-
-/* ICON BASE */
-.ic { width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0; }
-.ic-s { width:18px;height:18px; }
-.ic-f { width:26px;height:26px; }
-.ic-l { width:28px;height:28px; }
-
-/* CJX LOGO — matches app: C=white/font-black j=sky-400/font-bold X=sky-500/font-black */
-.cjx { letter-spacing:-.04em; font-weight:900; display:inline-block; }
-.cjx .c { color:#fff; }
-.cjx .j { color:#38bdf8; font-weight:800; }
-.cjx .x { color:#0ea5e9; }
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#050a18;--bg2:#0a1128;--surf:#111a2e;--card:rgba(255,255,255,.03);--cardh:rgba(255,255,255,.06);--bdr:rgba(255,255,255,.07);--bdrh:rgba(56,189,248,.3);--t1:#fff;--t2:#94a3b8;--t3:#64748b;--acc:#0ea5e9;--accl:#38bdf8;--accg:rgba(14,165,233,.15);--ind:#6366f1;--vio:#8b5cf6;--em:#10b981;--am:#f59e0b;--ro:#f43f5e;--r:16px;--rs:10px;--rl:24px;--ff:'Outfit',system-ui,sans-serif;--fb:'Sora',system-ui,sans-serif;--fm:'JetBrains Mono',monospace}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--fb);background:var(--bg);color:var(--t1);overflow-x:hidden;line-height:1.6}
+::selection{background:rgba(14,165,233,.3);color:#fff}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
+a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer;border:none;background:none}ul{list-style:none}
+.ctn{max-width:1240px;margin:0 auto;padding:0 2rem}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(14,165,233,.07),transparent 60%),radial-gradient(ellipse 60% 50% at 80% 30%,rgba(99,102,241,.05),transparent 60%),radial-gradient(ellipse 50% 40% at 50% 80%,rgba(139,92,246,.03),transparent 50%);pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px);background-size:72px 72px;pointer-events:none;z-index:0}
+section,nav,footer,.mo{position:relative;z-index:1}
+@keyframes fadeUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glow{0%,100%{opacity:.4}50%{opacity:.9}}
+@keyframes orb1{from{transform:rotate(0deg) translateX(140px) rotate(0deg)}to{transform:rotate(360deg) translateX(140px) rotate(-360deg)}}
+@keyframes orb2{from{transform:rotate(0deg) translateX(200px) rotate(0deg)}to{transform:rotate(360deg) translateX(200px) rotate(-360deg)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes slideR{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
+.anim{opacity:0;transform:translateY(36px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1)}
+.anim.vis{opacity:1;transform:translateY(0)}
+.d1{transition-delay:.1s!important}.d2{transition-delay:.2s!important}.d3{transition-delay:.3s!important}.d4{transition-delay:.4s!important}.d5{transition-delay:.5s!important}.d6{transition-delay:.6s!important}
 
 /* NAV */
-nav { position:fixed;top:0;width:100%;z-index:100;padding:1.1rem 3rem;display:flex;align-items:center;justify-content:space-between;background:rgba(10,14,23,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border); }
-nav .cjx { font-size:1.75rem; }
-.nr { display:flex;gap:1.75rem;align-items:center; }
-.nr a.nl { color:var(--text-muted);text-decoration:none;font-size:.875rem;font-weight:500;transition:color .2s; }
-.nr a.nl:hover { color:var(--text); }
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.1rem 0;transition:all .3s;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);background:rgba(5,10,24,.6);border-bottom:1px solid transparent}
+.nav.scrolled{background:rgba(5,10,24,.92);border-bottom-color:var(--bdr);padding:.75rem 0}
+.nav-in{display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:var(--ff);font-size:1.65rem;font-weight:900;letter-spacing:-.03em}
+.logo .lc{color:#fff}.logo .lj{color:var(--accl);font-weight:700}.logo .lx{color:var(--acc)}
+.nav-lk{display:flex;align-items:center;gap:2.5rem}
+.nav-lk a{font-size:.85rem;font-weight:500;color:var(--t2);transition:color .2s}.nav-lk a:hover{color:#fff}
+.nav-r{display:flex;align-items:center;gap:.75rem}
 
 /* BUTTONS */
-.btn { display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.5rem;font-weight:700;font-size:.85rem;border-radius:.7rem;border:none;cursor:pointer;transition:all .2s;text-decoration:none;font-family:inherit;line-height:1; }
-.btn-p { background:var(--accent);color:var(--bg); }
-.btn-p:hover { background:#7dd3fc;transform:translateY(-1px);box-shadow:0 8px 30px rgba(56,189,248,.3); }
-.btn-o { background:transparent;color:var(--text);border:1px solid var(--border); }
-.btn-o:hover { border-color:var(--accent);color:var(--accent);background:var(--accent-glow); }
-.btn-login { background:rgba(56,189,248,.1);color:var(--accent);border:1px solid rgba(56,189,248,.25); }
-.btn-login:hover { background:rgba(56,189,248,.2); }
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;font-family:var(--fb);font-weight:600;font-size:.875rem;padding:.7rem 1.6rem;border-radius:var(--rs);transition:all .25s cubic-bezier(.16,1,.3,1);letter-spacing:.01em;white-space:nowrap}
+.btn-g{color:var(--t2);border:1px solid var(--bdr)}.btn-g:hover{color:#fff;border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.04)}
+.btn-p{background:linear-gradient(135deg,var(--acc),#0284c7);color:#fff;box-shadow:0 0 24px rgba(14,165,233,.2),inset 0 1px 0 rgba(255,255,255,.1)}.btn-p:hover{transform:translateY(-2px);box-shadow:0 0 40px rgba(14,165,233,.35)}
+.btn-lg{padding:1rem 2.5rem;font-size:1rem;border-radius:var(--r)}
+.btn-w{background:#fff;color:var(--bg);font-weight:700;box-shadow:0 4px 24px rgba(0,0,0,.1)}.btn-w:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(0,0,0,.15)}
+.btn-o{border:1.5px solid rgba(255,255,255,.15);color:#fff}.btn-o:hover{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.05)}
+.btn-login{background:rgba(56,189,248,.1);color:var(--accl);border:1px solid rgba(56,189,248,.25)}.btn-login:hover{background:rgba(56,189,248,.2)}
 
 /* HERO */
-.hero { min-height:100vh;display:flex;align-items:center;padding:8rem 4rem 4rem;position:relative; }
-.hero-c { max-width:660px; }
-.badge { display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1rem;background:var(--accent-glow);border:1px solid rgba(56,189,248,.2);border-radius:100px;font-size:.8rem;font-weight:700;color:var(--accent);margin-bottom:2rem; }
-.badge .dot { width:6px;height:6px;background:var(--emerald);border-radius:50%;animation:pulseGlow 2s infinite; }
-.hero h1 { font-size:4.1rem;line-height:1.08;font-weight:900;margin-bottom:1.5rem;letter-spacing:-.03em; }
-.hero h1 .hl { color:var(--accent); }
-.hero .sub { font-size:1.15rem;line-height:1.7;color:var(--text-muted);max-width:520px;margin-bottom:2.5rem; }
-.ha { display:flex;gap:1rem;align-items:center; }
-.hv { position:absolute;right:4rem;top:50%;transform:translateY(-50%);width:470px; }
+.hero{padding:11rem 0 5rem;text-align:center;position:relative;overflow:hidden}
+.hero-rings{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+.hero-ring{position:absolute;border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);border:1px solid}
+.hr1{width:500px;height:500px;border-color:rgba(14,165,233,.08)}.hr2{width:720px;height:720px;border-color:rgba(99,102,241,.06)}.hr3{width:940px;height:940px;border-color:rgba(139,92,246,.03)}
+.hero-dot{position:absolute;width:5px;height:5px;border-radius:50%;top:50%;left:50%}
+.hd1{background:var(--acc);box-shadow:0 0 14px var(--acc);animation:orb1 22s linear infinite}
+.hd2{background:var(--ind);box-shadow:0 0 14px var(--ind);animation:orb2 30s linear infinite reverse}
+.hero-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1.25rem;background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.2);border-radius:100px;font-size:.78rem;font-weight:600;color:var(--accl);margin-bottom:2rem;animation:fadeUp .8s ease-out;letter-spacing:.03em}
+.hero-badge .dot{width:6px;height:6px;background:var(--em);border-radius:50%;animation:glow 2s infinite}
+.hero h1{font-family:var(--ff);font-size:clamp(2.75rem,5.5vw,4.5rem);font-weight:900;line-height:1.08;letter-spacing:-.04em;margin-bottom:1.5rem;animation:fadeUp .8s ease-out .1s both;background:linear-gradient(135deg,#fff 0%,#fff 50%,var(--accl) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p.sub{font-size:1.15rem;color:var(--t2);max-width:580px;margin:0 auto 2.5rem;animation:fadeUp .8s ease-out .2s both;line-height:1.7}
+.hero-cta{display:flex;align-items:center;justify-content:center;gap:1rem;animation:fadeUp .8s ease-out .3s both;flex-wrap:wrap}
 
-/* MOCKUP */
-.mk { background:var(--surface);border-radius:1rem;border:1px solid var(--border);overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.4),0 0 60px rgba(56,189,248,.05);animation:float 6s ease-in-out infinite; }
-.mk-bar { padding:.7rem 1rem;background:var(--bg-subtle);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.5rem; }
-.mk-dot { width:8px;height:8px;border-radius:50%; }
-.mk-body { padding:1rem; }
-.sr { display:flex;gap:.5rem;margin-bottom:.75rem; }
-.sc { flex:1;padding:.7rem;background:var(--bg);border-radius:.5rem;border:1px solid var(--border); }
-.sc .l { font-size:.58rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em; }
-.sc .v { font-size:1.2rem;font-weight:800;margin-top:.2rem; }
-.ml { display:flex;flex-direction:column;gap:.35rem; }
-.mi { display:flex;align-items:center;gap:.5rem;padding:.45rem .7rem;background:var(--bg);border-radius:.35rem;border:1px solid var(--border);font-size:.68rem; }
-.mi .nm { color:var(--text);font-weight:700;flex:1; }
-.tg { padding:.1rem .45rem;border-radius:100px;font-size:.58rem;font-weight:700; }
-.tg-g { background:rgba(52,211,153,.15);color:var(--emerald); }
-.tg-a { background:rgba(251,191,36,.15);color:var(--amber); }
-.tg-b { background:rgba(56,189,248,.15);color:var(--accent); }
-.sd { width:6px;height:6px;border-radius:50%; }
+/* TRUST */
+.trust{padding:3rem 0 5rem;text-align:center}
+.trust-lbl{font-size:.72rem;font-weight:600;color:var(--t3);letter-spacing:.15em;text-transform:uppercase;margin-bottom:1.5rem}
+.trust-row{display:flex;align-items:center;justify-content:center;gap:4rem;flex-wrap:wrap}
+.trust-s .num{font-family:var(--ff);font-size:2.25rem;font-weight:800;letter-spacing:-.02em}.trust-s .num span{color:var(--acc)}
+.trust-s .lbl{font-size:.8rem;color:var(--t3);margin-top:.25rem}
 
-/* SECTIONS */
-section { padding:6rem 4rem;position:relative; }
-.slbl { font-size:.75rem;text-transform:uppercase;letter-spacing:.15em;color:var(--accent);font-weight:800;margin-bottom:1rem; }
-.stitle { font-size:2.75rem;line-height:1.12;font-weight:900;margin-bottom:1.5rem;max-width:600px;letter-spacing:-.025em; }
-.sdesc { font-size:1.05rem;color:var(--text-muted);line-height:1.7;max-width:560px;margin-bottom:3rem; }
+/* PREVIEW */
+.preview{padding:0 0 6rem}
+.prev-card{background:linear-gradient(135deg,rgba(14,165,233,.05),rgba(99,102,241,.03));border:1px solid var(--bdr);border-radius:var(--rl);padding:2px;overflow:hidden;box-shadow:0 0 80px rgba(14,165,233,.05),0 40px 80px rgba(0,0,0,.3)}
+.prev-inner{background:var(--bg2);border-radius:22px;overflow:hidden}
+.prev-bar{display:flex;align-items:center;gap:.5rem;padding:.75rem 1.25rem;background:rgba(0,0,0,.3);border-bottom:1px solid var(--bdr)}
+.prev-dot{width:10px;height:10px;border-radius:50%}.prev-dot:nth-child(1){background:#f43f5e}.prev-dot:nth-child(2){background:#f59e0b}.prev-dot:nth-child(3){background:#10b981}
+.prev-url{margin-left:.75rem;font-family:var(--fm);font-size:.7rem;color:var(--t3);background:rgba(255,255,255,.05);padding:.3rem .75rem;border-radius:6px}
+.prev-body{padding:2rem;display:grid;grid-template-columns:200px 1fr;gap:1.5rem;min-height:320px}
+.prev-sb{display:flex;flex-direction:column;gap:.5rem}
+.psb{display:flex;align-items:center;gap:.65rem;padding:.6rem .85rem;border-radius:10px;font-size:.78rem;font-weight:500;color:var(--t2)}
+.psb.act{background:rgba(14,165,233,.1);color:var(--accl)}
+.psb svg{width:16px;height:16px;opacity:.6}
+.prev-main{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;align-content:start}
+.pm{background:rgba(255,255,255,.03);border:1px solid var(--bdr);border-radius:12px;padding:1.25rem}
+.pm .l{font-size:.7rem;color:var(--t3);font-weight:500;margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.05em}
+.pm .v{font-family:var(--ff);font-size:1.75rem;font-weight:800}
+.pm .c{font-size:.7rem;color:var(--em);font-weight:600;margin-top:.25rem}
+.prev-list{grid-column:1/-1;display:flex;flex-direction:column;gap:.5rem}
+.pli{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:rgba(255,255,255,.02);border:1px solid var(--bdr);border-radius:10px}
+.pli .n{font-size:.82rem;font-weight:600}.pli .t{font-size:.65rem;font-weight:600;padding:.2rem .6rem;border-radius:100px}
+
+/* SECTION LABELS */
+.slbl{font-size:.72rem;font-weight:700;color:var(--acc);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.75rem}
+.stitle{font-family:var(--ff);font-size:clamp(2rem,3.5vw,2.75rem);font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:1rem}
+.sdesc{font-size:1.05rem;color:var(--t2);max-width:560px;line-height:1.7;margin-bottom:3rem}
 
 /* FEATURES */
-.fg3 { display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;max-width:1200px;margin:0 auto; }
-.ft { padding:2rem;background:var(--surface);border:1px solid var(--border);border-radius:1rem;transition:all .3s;position:relative;overflow:hidden; }
-.ft::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;transition:opacity .3s; }
-.ft:hover { border-color:rgba(56,189,248,.3);transform:translateY(-4px);box-shadow:0 20px 40px rgba(0,0,0,.2); }
-.ft:hover::before { opacity:1; }
-.fi { width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem; }
-.ft h3 { font-size:1.1rem;font-weight:800;margin-bottom:.75rem; }
-.ft p { font-size:.9rem;color:var(--text-muted);line-height:1.6; }
+.features{padding:6rem 0}
+.fh{text-align:center;margin-bottom:4rem}.fh .sdesc{margin:0 auto 0}
+.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;max-width:1200px;margin:0 auto}
+.fc{padding:2rem;border-radius:var(--r);border:1px solid var(--bdr);background:var(--card);transition:all .35s cubic-bezier(.16,1,.3,1);position:relative;overflow:hidden}
+.fc:hover{border-color:var(--bdrh);background:var(--cardh);transform:translateY(-4px)}
+.fc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--acc),transparent);opacity:0;transition:opacity .3s}
+.fc:hover::before{opacity:1}
+.fi{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem}
+.fc h3{font-family:var(--ff);font-size:1.1rem;font-weight:700;margin-bottom:.5rem}
+.fc p{font-size:.85rem;color:var(--t2);line-height:1.65}
 
-/* BUILT FOR */
-.bf { background:var(--bg-subtle);border-top:1px solid var(--border);border-bottom:1px solid var(--border); }
-.bfg { display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;max-width:1100px;margin:0 auto; }
-.bfl { display:flex;flex-direction:column;gap:1.5rem; }
-.bi { display:flex;gap:1rem;align-items:flex-start; }
-.bi .n { width:36px;height:36px;min-width:36px;border-radius:10px;background:var(--accent-glow);border:1px solid rgba(56,189,248,.2);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.85rem; }
-.bi h4 { font-weight:800;font-size:1rem;margin-bottom:.25rem; }
-.bi p { font-size:.875rem;color:var(--text-muted);line-height:1.5; }
+/* WHY CJX */
+.why{padding:6rem 0;background:var(--surf);border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr)}
+.wgrid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;max-width:1100px;margin:0 auto}
+.wsteps{display:flex;flex-direction:column;gap:1.75rem}
+.wst{display:flex;gap:1.25rem;align-items:flex-start}
+.wnum{width:40px;height:40px;border-radius:12px;background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.15);display:flex;align-items:center;justify-content:center;font-family:var(--ff);font-weight:800;font-size:.9rem;color:var(--accl);flex-shrink:0}
+.wst h4{font-family:var(--ff);font-size:1rem;font-weight:700;margin-bottom:.35rem}
+.wst p{font-size:.85rem;color:var(--t2);line-height:1.65}
 
 /* PRICING */
-.pg { display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;max-width:1000px;margin:0 auto; }
-.pc { padding:2.5rem;background:var(--surface);border:1px solid var(--border);border-radius:1rem;position:relative;transition:all .3s; }
-.pc.pop { border-color:var(--accent);box-shadow:0 0 40px rgba(56,189,248,.1); }
-.pc.pop::before { content:'MOST POPULAR';position:absolute;top:-12px;left:50%;transform:translateX(-50%);padding:.25rem 1rem;background:var(--accent);color:var(--bg);font-size:.65rem;font-weight:900;letter-spacing:.1em;border-radius:100px; }
-.pc h3 { font-size:1.2rem;font-weight:800;margin-bottom:.5rem; }
-.pc .amt { font-size:3rem;font-weight:900;margin-bottom:.25rem; }
-.pc .amt span { font-size:1rem;font-weight:500;color:var(--text-muted); }
-.pc .pd { font-size:.85rem;color:var(--text-muted);margin-bottom:2rem; }
-.pf { list-style:none;display:flex;flex-direction:column;gap:.7rem;margin-bottom:2rem; }
-.pf li { font-size:.875rem;color:var(--text-muted);display:flex;align-items:center;gap:.7rem; }
+.pricing{padding:6rem 0}
+.ph{text-align:center;margin-bottom:4rem}.ph .sdesc{margin:0 auto 0}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;max-width:1000px;margin:0 auto 2rem}
+.pc{padding:2.5rem 2rem;border-radius:var(--r);border:1px solid var(--bdr);background:var(--card);transition:all .35s;position:relative;display:flex;flex-direction:column}
+.pc:hover{border-color:var(--bdrh);transform:translateY(-4px)}
+.pc.pop{border-color:rgba(99,102,241,.35);background:rgba(99,102,241,.06);box-shadow:0 0 60px rgba(99,102,241,.08)}.pc.pop:hover{border-color:rgba(99,102,241,.5)}
+.pbadge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);padding:.35rem 1rem;background:linear-gradient(135deg,var(--ind),var(--vio));color:#fff;font-size:.7rem;font-weight:700;border-radius:100px;letter-spacing:.04em}
+.pc h3{font-family:var(--ff);font-size:1.15rem;font-weight:700;margin-bottom:.75rem}
+.pamt .dollar{font-family:var(--ff);font-size:2.75rem;font-weight:900;letter-spacing:-.03em;line-height:1}
+.pamt .per{font-size:.85rem;color:var(--t3)}
+.pdesc{font-size:.82rem;color:var(--t3);margin:.25rem 0 1.75rem;line-height:1.5}
+.pfeat{flex:1;display:flex;flex-direction:column;gap:.65rem;margin-bottom:2rem}
+.pfeat li{display:flex;align-items:center;gap:.6rem;font-size:.84rem;color:var(--t2)}
+.ck{width:16px;height:16px;color:var(--em);flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.pcta{margin-top:auto}.pcta .btn{width:100%}
+.pnote{text-align:center;font-size:.85rem;color:var(--t3)}.pnote a{color:var(--accl);font-weight:600}
+.pvol{margin-top:1.5rem;padding:1.25rem 2rem;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);border-radius:var(--r);display:inline-flex;align-items:center;gap:.75rem;font-size:.85rem;color:var(--t2)}.pvol strong{color:var(--em)}
 
 /* CTA */
-.cta { text-align:center;padding:8rem 4rem; }
-.ctab { max-width:700px;margin:0 auto;padding:4rem;background:linear-gradient(135deg,var(--surface) 0%,rgba(56,189,248,.05) 100%);border:1px solid var(--border);border-radius:1.5rem;position:relative;overflow:hidden; }
-.ctab::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent); }
-.ctab h2 { font-size:2.75rem;font-weight:900;margin-bottom:1rem;letter-spacing:-.02em; }
-.ctab p { color:var(--text-muted);font-size:1.05rem;margin-bottom:2rem;line-height:1.6; }
-.ctaa { display:flex;gap:1rem;justify-content:center;flex-wrap:wrap; }
+.cta-s{padding:6rem 0}
+.cta-card{background:linear-gradient(135deg,rgba(14,165,233,.08),rgba(99,102,241,.05));border:1px solid rgba(14,165,233,.15);border-radius:var(--rl);padding:4rem;text-align:center;position:relative;overflow:hidden}
+.cta-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--acc),transparent)}
+.cta-card h2{font-family:var(--ff);font-size:clamp(1.75rem,3vw,2.5rem);font-weight:800;letter-spacing:-.03em;margin-bottom:1rem;position:relative}
+.cta-card p{font-size:1rem;color:var(--t2);max-width:520px;margin:0 auto 2rem;position:relative;line-height:1.7}
+.cta-btns{display:flex;align-items:center;justify-content:center;gap:1rem;position:relative;flex-wrap:wrap}
+
+/* CONTACT */
+.contact{padding:0 0 6rem}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.ccard{padding:2.5rem;border-radius:var(--r);border:1px solid var(--bdr);background:var(--card);text-align:center;transition:all .3s}
+.ccard:hover{border-color:var(--bdrh);background:var(--cardh)}
+.ccard svg{margin-bottom:1rem;color:var(--acc)}
+.ccard h3{font-family:var(--ff);font-size:1rem;font-weight:700;margin-bottom:.5rem}
+.ccard a{color:var(--accl);font-size:.9rem;font-weight:600}.ccard p{font-size:.82rem;color:var(--t3);margin-top:.35rem}
 
 /* FOOTER */
-footer { padding:3rem 4rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem; }
-footer p { color:var(--text-muted);font-size:.8rem; }
-footer a { color:var(--text-muted);text-decoration:none;font-size:.8rem;transition:color .2s; }
-footer a:hover { color:var(--accent); }
+.footer{border-top:1px solid var(--bdr);padding:2.5rem 0}
+.foot-in{display:flex;align-items:center;justify-content:space-between}
+.foot-c{font-size:.75rem;color:var(--t3)}
+.foot-l{display:flex;gap:1.5rem}.foot-l a{font-size:.75rem;color:var(--t3);transition:color .2s}.foot-l a:hover{color:#fff}
 
 /* MODAL */
-.mo { display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:200;align-items:center;justify-content:center;padding:2rem; }
-.mo.open { display:flex; }
-.md { background:var(--surface);border:1px solid var(--border);border-radius:1.25rem;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 40px 80px rgba(0,0,0,.5); }
-.mh { padding:1.5rem 2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between; }
-.mh h2 { font-size:1.2rem;font-weight:800; }
-.mx { background:none;border:none;color:var(--text-muted);cursor:pointer;padding:.25rem;transition:color .2s; }
-.mx:hover { color:var(--text); }
-.mb { padding:2rem; }
-.fg { margin-bottom:1.25rem; }
-.fg label { display:block;font-size:.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem; }
-.fg input,.fg select,.fg textarea { width:100%;padding:.7rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:.5rem;color:var(--text);font-size:.9rem;font-family:inherit;transition:border-color .2s;outline:none; }
-.fg input:focus,.fg select:focus,.fg textarea:focus { border-color:var(--accent); }
-.fg input::placeholder,.fg textarea::placeholder { color:#4a5578; }
-.fg textarea { resize:vertical;min-height:80px; }
-.fr { display:grid;grid-template-columns:1fr 1fr;gap:1rem; }
-.fok { text-align:center;padding:2rem 0; }
-.fok .oki { width:64px;height:64px;background:rgba(52,211,153,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem; }
-.fok h3 { font-size:1.2rem;font-weight:800;margin-bottom:.5rem; }
-.fok p { color:var(--text-muted);font-size:.9rem;line-height:1.5; }
-
-/* CHECK ICON for pricing */
-.ck { width:16px;height:16px;color:var(--emerald);flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round; }
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:200;align-items:center;justify-content:center;padding:2rem}
+.mo.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rl);width:100%;max-width:920px;max-height:90vh;overflow-y:auto;position:relative;animation:fadeUp .4s ease-out}
+.modal-x{position:absolute;top:1.25rem;right:1.25rem;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:1.25rem;transition:all .2s;z-index:10}
+.modal-x:hover{background:rgba(255,255,255,.1);color:#fff}
+.modal-h{padding:2.5rem 2.5rem 1.5rem;border-bottom:1px solid var(--bdr)}
+.modal-h h2{font-family:var(--ff);font-size:1.5rem;font-weight:800}
+.modal-h p{font-size:.88rem;color:var(--t2);margin-top:.35rem}
+.modal-body{display:flex}
+.modal-form{flex:1;padding:2rem 2.5rem 2.5rem}
+.modal-side{width:320px;background:rgba(14,165,233,.04);border-left:1px solid var(--bdr);padding:2rem;flex-shrink:0;animation:slideR .5s ease-out .2s both}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.fg{margin-bottom:1rem}
+.fg label{display:block;font-size:.78rem;font-weight:600;color:var(--t2);margin-bottom:.4rem;letter-spacing:.02em}
+.fg input,.fg select,.fg textarea{width:100%;padding:.65rem .9rem;background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:var(--rs);color:#fff;font-family:var(--fb);font-size:.85rem;transition:all .2s;outline:none}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--accg)}
+.fg input::placeholder,.fg textarea::placeholder{color:var(--t3)}
+.fg select{cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .75rem center;padding-right:2rem}
+.fg select option{background:var(--bg2);color:#fff}
+.fg textarea{resize:vertical;min-height:80px}
+.cost-t{font-family:var(--ff);font-size:1rem;font-weight:700;margin-bottom:1.5rem;display:flex;align-items:center;gap:.5rem}
+.cost-t svg{color:var(--acc)}
+.cl{display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;font-size:.84rem;border-bottom:1px solid var(--bdr)}
+.cl .k{color:var(--t2)}.cl .vv{font-weight:600}.cl .vv.grn{color:var(--em)}
+.cost-tot{margin-top:1rem;padding:1.25rem;background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.2);border-radius:12px;text-align:center}
+.cost-tot .amt{font-family:var(--ff);font-size:2rem;font-weight:900;color:var(--accl)}
+.cost-tot .per{font-size:.8rem;color:var(--t2);margin-top:.15rem}
+.cost-sv{margin-top:.75rem;text-align:center;font-size:.78rem;font-weight:600;color:var(--em);background:rgba(16,185,129,.08);padding:.45rem .75rem;border-radius:100px}
+.modal-ok{padding:4rem 2.5rem;text-align:center;display:none}
+.modal-ok svg{color:var(--em);margin-bottom:1.5rem}
+.modal-ok h3{font-family:var(--ff);font-size:1.5rem;font-weight:800;margin-bottom:.75rem}
+.modal-ok p{font-size:.9rem;color:var(--t2);max-width:400px;margin:0 auto}
 
 /* RESPONSIVE */
-@media(max-width:1024px){
-  .hero{flex-direction:column;padding:7rem 2rem 3rem;text-align:center}
-  .hero h1{font-size:2.6rem}
-  .hero .sub{margin:0 auto 2rem}
-  .ha{justify-content:center;flex-wrap:wrap}
-  .hv{position:relative;right:auto;top:auto;transform:none;width:100%;max-width:460px;margin:3rem auto 0}
-  .fg3{grid-template-columns:1fr;max-width:500px}
-  .pg{grid-template-columns:1fr;max-width:400px}
-  .bfg{grid-template-columns:1fr}
-  section{padding:4rem 2rem}
-  nav{padding:1rem 1.5rem}
-  .nr{gap:1rem}
-  .hm{display:none}
-}
+@media(max-width:1024px){.fgrid,.pgrid{grid-template-columns:1fr 1fr}.wgrid{grid-template-columns:1fr;gap:3rem}.prev-body{grid-template-columns:1fr}.prev-sb{display:none}.modal-body{flex-direction:column}.modal-side{width:100%;border-left:none;border-top:1px solid var(--bdr)}}
+@media(max-width:768px){.fgrid,.pgrid,.cgrid{grid-template-columns:1fr}.nav-lk{display:none}.hero{padding:8rem 0 4rem}.hero h1{font-size:2.25rem}.trust-row{gap:2rem}.trust-s .num{font-size:1.75rem}.fr{grid-template-columns:1fr}.cta-card{padding:2.5rem 1.5rem}.foot-in{flex-direction:column;gap:1rem;text-align:center}}
 </style>
 </head>
 <body>
 
-<div class="grid-bg"></div>
-<div class="glow-orb"></div>
-<div class="glow-orb-2"></div>
-
 <!-- NAV -->
-<nav>
-  <div class="cjx" style="font-size:1.75rem"><span class="c">C</span><span class="j">j</span><span class="x">X</span></div>
-  <div class="nr">
-    <a href="#features" class="nl hm">Features</a>
-    <a href="#built-for" class="nl hm">Why CJX</a>
-    <a href="#pricing" class="nl hm">Pricing</a>
-    <a href="#contact" class="nl hm">Contact</a>
-    <a href="https://cjx-frontend.vercel.app" class="btn btn-login">
-      <svg class="ic ic-s" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-      Login
-    </a>
-    <a href="#" class="btn btn-p" onclick="openForm();return false">Get Started</a>
-  </div>
-</nav>
+<nav class="nav" id="nav"><div class="ctn nav-in">
+<a href="#" class="logo"><span class="lc">C</span><span class="lj">j</span><span class="lx">X</span></a>
+<div class="nav-lk"><a href="#features">Features</a><a href="#why">Why CJX</a><a href="#pricing">Pricing</a><a href="#contact">Contact</a></div>
+<div class="nav-r">
+<a href="https://app.gocjx.com" class="btn btn-login">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+Login</a>
+<button onclick="openModal()" class="btn btn-p">Get Started</button>
+</div>
+</div></nav>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-c">
-    <div class="badge anim"><span class="dot"></span> Built for insurance agencies</div>
-    <h1 class="anim d1">Your agency's<br><span class="hl">entire phone system</span><br>in one place.</h1>
-    <p class="sub anim d2">CJX is the communication platform built specifically for insurance agencies. Calls, texts, quotes, notes, and CRM — unified in a single workspace your team actually wants to use.</p>
-    <div class="ha anim d3">
-      <a href="#" class="btn btn-p" onclick="openForm();return false">
-        <svg class="ic ic-s" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        Get Started
-      </a>
-      <a href="#features" class="btn btn-o">See Features</a>
-    </div>
-  </div>
-
-  <div class="hv anim d4">
-    <div class="mk">
-      <div class="mk-bar">
-        <div class="mk-dot" style="background:#f43f5e"></div>
-        <div class="mk-dot" style="background:#fbbf24"></div>
-        <div class="mk-dot" style="background:#34d399"></div>
-        <span style="margin-left:.5rem;font-size:.7rem;color:var(--text-muted);font-weight:700">
-          <span class="cjx" style="font-size:.75rem"><span class="c">C</span><span class="j">j</span><span class="x">X</span></span> Dashboard
-        </span>
-      </div>
-      <div class="mk-body">
-        <div class="sr">
-          <div class="sc"><div class="l">Today's Calls</div><div class="v" style="color:var(--accent)">127</div></div>
-          <div class="sc"><div class="l">Messages</div><div class="v" style="color:var(--violet)">43</div></div>
-          <div class="sc"><div class="l">Active Quotes</div><div class="v" style="color:var(--amber)">8</div></div>
-        </div>
-        <div class="ml">
-          <div class="mi"><div class="sd" style="background:var(--emerald)"></div><span class="nm">Sarah Johnson</span><span class="tg tg-g">Auto + Home</span></div>
-          <div class="mi"><div class="sd" style="background:var(--amber)"></div><span class="nm">Mike Chen</span><span class="tg tg-a">BOP Quote</span></div>
-          <div class="mi"><div class="sd" style="background:var(--accent)"></div><span class="nm">Emily Rodriguez</span><span class="tg tg-b">Renewal</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="hero-rings"><div class="hero-ring hr1"></div><div class="hero-ring hr2"></div><div class="hero-ring hr3"></div><div class="hero-dot hd1"></div><div class="hero-dot hd2"></div></div>
+<div class="ctn" style="position:relative">
+<div class="hero-badge"><span class="dot"></span> Now available nationwide</div>
+<h1>Your agency's entire<br>communication stack.<br>One platform.</h1>
+<p class="sub">CJX is the communication platform built exclusively for insurance agencies. Calls, texts, quotes, notes, with CRM integrations &mdash; unified in one workspace your team actually wants to use.</p>
+<div class="hero-cta">
+<button onclick="openModal()" class="btn btn-p btn-lg">Join the Waitlist &rarr;</button>
+<a href="#features" class="btn btn-o btn-lg">See Features</a>
+</div>
+</div>
 </section>
+
+<!-- TRUST -->
+<section class="trust"><div class="ctn">
+<div class="trust-lbl">Built different from generic CRMs</div>
+<div class="trust-row">
+<div class="trust-s anim"><div class="num">6<span>+</span></div><div class="lbl">Core Apps, One Platform</div></div>
+<div class="trust-s anim d1"><div class="num">0</div><div class="lbl">Desk Phones Required</div></div>
+<div class="trust-s anim d2"><div class="num">1<span> day</span></div><div class="lbl">Setup &amp; Onboarding</div></div>
+<div class="trust-s anim d3"><div class="num">24<span>/7</span></div><div class="lbl">Cloud Availability</div></div>
+</div>
+</div></section>
+
+<!-- DASHBOARD PREVIEW -->
+<section class="preview anim"><div class="ctn"><div class="prev-card"><div class="prev-inner">
+<div class="prev-bar">
+<div class="prev-dot"></div><div class="prev-dot"></div><div class="prev-dot"></div>
+<div class="prev-url">app.gocjx.com</div>
+</div>
+<div class="prev-body">
+<div class="prev-sb">
+<div class="psb act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</div>
+<div class="psb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3"/></svg>Calls</div>
+<div class="psb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Messages</div>
+<div class="psb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="8.5" cy="7" r="4"/></svg>Contacts</div>
+<div class="psb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>Quick Quote</div>
+</div>
+<div class="prev-main">
+<div class="pm"><div class="l">Today's Calls</div><div class="v" style="color:var(--accl)">127</div><div class="c">&uarr; 12% from yesterday</div></div>
+<div class="pm"><div class="l">Messages</div><div class="v" style="color:var(--vio)">43</div><div class="c">3 unread</div></div>
+<div class="pm"><div class="l">Active Quotes</div><div class="v" style="color:var(--am)">8</div><div class="c">2 new today</div></div>
+<div class="prev-list">
+<div class="pli"><div class="n">Sarah Johnson</div><div class="t" style="background:rgba(16,185,129,.12);color:var(--em)">Auto + Home</div></div>
+<div class="pli"><div class="n">Mike Chen</div><div class="t" style="background:rgba(245,158,11,.12);color:var(--am)">BOP Quote</div></div>
+<div class="pli"><div class="n">Emily Rodriguez</div><div class="t" style="background:rgba(14,165,233,.12);color:var(--accl)">Renewal</div></div>
+</div>
+</div>
+</div>
+</div></div></div></section>
 
 <!-- FEATURES -->
-<section id="features">
-  <div class="slbl anim">Features</div>
-  <div class="stitle anim d1">Everything your agency needs.<br>Nothing it doesn't.</div>
-  <div class="sdesc anim d2">Built by someone who actually works in an insurance agency. Every feature exists because it solves a real daily problem.</div>
+<section class="features" id="features"><div class="ctn">
+<div class="fh anim">
+<div class="slbl">Features</div>
+<div class="stitle">Everything your agency needs.<br>Nothing it doesn't.</div>
+<div class="sdesc">Built by someone who actually works in an insurance agency. Every feature exists because it solves a real daily problem.</div>
+</div>
+<div class="fgrid">
+<div class="fc anim">
+<div class="fi" style="background:rgba(14,165,233,.1);color:var(--acc)">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 013.09 5.18 2 2 0 015.11 3h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 11.91a16 16 0 006 6l2.27-2.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+</div>
+<h3>WebRTC Calling</h3>
+<p>Make and receive calls directly in the browser. No desk phones needed. Call logging, transfer, hold, and mute &mdash; all built in.</p>
+</div>
+<div class="fc anim d1">
+<div class="fi" style="background:rgba(139,92,246,.1);color:var(--vio)">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+</div>
+<h3>SMS Messaging</h3>
+<p>Two-way texting with clients from your agency number. Full conversation history and quick replies. No personal phones.</p>
+</div>
+<div class="fc anim d2">
+<div class="fi" style="background:rgba(245,158,11,.1);color:var(--am)">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>
+</div>
+<h3>Quick Quote Queue</h3>
+<p>Incoming quote requests land in a shared queue. Claim, assign, and track &mdash; no more lost sticky notes or email chains.</p>
+</div>
+<div class="fc anim d3">
+<div class="fi" style="background:rgba(16,185,129,.1);color:var(--em)">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+</div>
+<h3>Contact Notes &amp; CRM</h3>
+<p>Every call, every note, every policy detail &mdash; attached to the client. Full context for whoever picks up the phone next.</p>
+</div>
+<div class="fc anim d4">
+<div class="fi" style="background:rgba(244,63,94,.1);color:var(--ro)">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+</div>
+<h3>Team Management</h3>
+<p>Real-time availability, on-call indicators, internal messaging, and role-based permissions for admins, agents, and staff.</p>
+</div>
+<div class="fc anim d5">
+<div class="fi" style="background:rgba(14,165,233,.1);color:var(--acc)">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+</div>
+<h3>Enterprise Security</h3>
+<p>Two-factor authentication, role-based permissions, encrypted data, audit logging, and account lockout protection.</p>
+</div>
+</div>
+</div></section>
 
-  <div class="fg3">
-    <div class="ft anim d1">
-      <div class="fi" style="background:rgba(56,189,248,.1);color:var(--accent)">
-        <svg class="ic ic-f" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-      </div>
-      <h3>WebRTC Calling</h3>
-      <p>Make and receive calls directly in the browser. No desk phones needed. Call logging, transfer, hold, and mute built in.</p>
-    </div>
-    <div class="ft anim d2">
-      <div class="fi" style="background:rgba(167,139,250,.1);color:var(--violet)">
-        <svg class="ic ic-f" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      </div>
-      <h3>SMS Messaging</h3>
-      <p>Text clients from your agency number. Full conversation history, read receipts, and quick replies. No personal phones.</p>
-    </div>
-    <div class="ft anim d3">
-      <div class="fi" style="background:rgba(251,191,36,.1);color:var(--amber)">
-        <svg class="ic ic-f" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-      </div>
-      <h3>Quick Quote Queue</h3>
-      <p>Incoming quote requests land in a shared queue. Claim, assign, and track — no more lost sticky notes or email chains.</p>
-    </div>
-    <div class="ft anim d4">
-      <div class="fi" style="background:rgba(52,211,153,.1);color:var(--emerald)">
-        <svg class="ic ic-f" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
-      </div>
-      <h3>Contact Notes</h3>
-      <p>Every call, every note, every policy detail — attached to the client. The next person who picks up the phone has full context.</p>
-    </div>
-    <div class="ft anim d5">
-      <div class="fi" style="background:rgba(244,63,94,.1);color:var(--rose)">
-        <svg class="ic ic-f" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      </div>
-      <h3>Team Management</h3>
-      <p>See who's available, busy, or away. Internal calling and messaging. Role-based permissions for admins, agents, and staff.</p>
-    </div>
-    <div class="ft anim d6">
-      <div class="fi" style="background:rgba(56,189,248,.1);color:var(--accent)">
-        <svg class="ic ic-f" viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
-      </div>
-      <h3>Activity Tracking</h3>
-      <p>Daily task lists, call history, bulletin boards. Know exactly what happened today — and what needs to happen tomorrow.</p>
-    </div>
-  </div>
-</section>
-
-<!-- BUILT FOR -->
-<section class="bf" id="built-for">
-  <div class="bfg">
-    <div>
-      <div class="slbl">Why CJX</div>
-      <div class="stitle">Built by an agency,<br>for agencies.</div>
-      <p class="sdesc" style="margin-bottom:0">Generic CRMs and phone systems weren't made for insurance. You end up paying for features you don't use and missing the ones you need. CJX is different.</p>
-    </div>
-    <div class="bfl">
-      <div class="bi"><div class="n">1</div><div><h4>No more app switching</h4><p>Phone system, texting, notes, quotes, and team chat — all in one tab. Your team stops wasting time bouncing between tools.</p></div></div>
-      <div class="bi"><div class="n">2</div><div><h4>Every screen does something</h4><p>No "nothing-screens." Every view is actionable. If you're looking at a contact, you can call, text, add notes, or pull up their policy — right there.</p></div></div>
-      <div class="bi"><div class="n">3</div><div><h4>Insurance-specific workflows</h4><p>Quote intake forms with HO, AUTO, BOP, BAP, CPP, Farm, PU, and CU policy types built in. We speak your language.</p></div></div>
-      <div class="bi"><div class="n">4</div><div><h4>Up and running in a day</h4><p>We handle setup personally. Port your number, configure your team, and train your staff. You're live by end of day.</p></div></div>
-    </div>
-  </div>
-</section>
+<!-- WHY CJX -->
+<section class="why" id="why"><div class="ctn">
+<div class="wgrid">
+<div class="anim">
+<div class="slbl">Why CJX</div>
+<div class="stitle">Built by an agency,<br>for agencies.</div>
+<div class="sdesc" style="margin-bottom:0">Generic CRMs and phone systems weren't made for insurance. You end up paying for features you don't use and missing the ones you need. CJX is different.</div>
+</div>
+<div class="wsteps">
+<div class="wst anim"><div class="wnum">1</div><div><h4>No more app switching</h4><p>Phone system, texting, notes, quotes, and team chat &mdash; all in one tab. Stop bouncing between tools.</p></div></div>
+<div class="wst anim d1"><div class="wnum">2</div><div><h4>Every screen does something</h4><p>No &ldquo;nothing-screens.&rdquo; Every view is actionable. If you're looking at a contact, you can call, text, or add notes right there.</p></div></div>
+<div class="wst anim d2"><div class="wnum">3</div><div><h4>Insurance-specific workflows</h4><p>Quote intake forms with HO, AUTO, BOP, BAP, CPP, Farm, PU, and CU policy types built in. We speak your language.</p></div></div>
+<div class="wst anim d3"><div class="wnum">4</div><div><h4>Up and running in a day</h4><p>We handle setup personally. Port your number, configure your team, and train your staff. Live by end of day.</p></div></div>
+</div>
+</div>
+</div></section>
 
 <!-- PRICING -->
-<section id="pricing">
-  <div style="text-align:center;margin-bottom:3rem">
-    <div class="slbl" style="text-align:center">Pricing</div>
-    <div class="stitle" style="margin:0 auto 1rem;text-align:center;max-width:500px">Simple plans.<br>No surprises.</div>
-    <p style="color:var(--text-muted);max-width:500px;margin:0 auto;font-size:1rem">Every plan includes calling, texting, CRM, and unlimited support. Pick the size that fits your team.</p>
-  </div>
-
-  <div class="pg">
-    <div class="pc">
-      <h3>Starter</h3>
-      <div class="amt">$49<span>/mo</span></div>
-      <div class="pd">For small agencies up to 5 users</div>
-      <ul class="pf">
-        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Up to 5 users</li>
-        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>WebRTC calling</li>
-        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>SMS messaging</li>
-        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Contact notes &amp; CRM</li>
-        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Quote queue</li>
-        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Email support</li>
-      </ul>
-      <a href="#" class="btn btn-o" style="width:100%;justify-content:center" onclick="openForm();return false">Get Started</a>
-    </div>
-    <div class="pc pop">
-      <h3>Professional</h3>
-      <div class="amt">$99<span>/mo</span></div>
-      <div class="pd">For growing agencies up to 15 users</div>
-      <ul class="pf">
-        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Up to 15 users</li>
-        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Everything in Starter</li>
-        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Power dialer</li>
-        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Call recording</li>
-        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Advanced analytics</li>
-        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Priority support</li>
-      </ul>
-      <a href="#" class="btn btn-p" style="width:100%;justify-content:center" onclick="openForm();return false">Get Started</a>
-    </div>
-    <div class="pc">
-      <h3>Enterprise</h3>
-      <div class="amt">$199<span>/mo</span></div>
-      <div class="pd">For large agencies, unlimited users</div>
-      <ul class="pf">
-        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Unlimited users</li>
-        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Everything in Professional</li>
-        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Custom integrations</li>
-        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Dedicated account manager</li>
-        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Custom training</li>
-        <li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>SLA guarantee</li>
-      </ul>
-      <a href="#" class="btn btn-o" style="width:100%;justify-content:center" onclick="openForm();return false">Contact Us</a>
-    </div>
-  </div>
-</section>
+<section class="pricing" id="pricing"><div class="ctn">
+<div class="ph anim">
+<div class="slbl">Pricing</div>
+<div class="stitle">Simple, transparent pricing.</div>
+<div class="sdesc">Starting at <strong style="color:var(--accl)">$50 &ndash; $100</strong> /user/month. More users = lower cost per seat.</div>
+</div>
+<div class="pgrid">
+<div class="pc anim">
+<h3>Starter</h3>
+<div class="pamt"><span class="dollar">$50</span><span class="per"> /user/mo</span></div>
+<div class="pdesc">For small agencies getting started with unified communications.</div>
+<ul class="pfeat">
+<li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Up to 5 users</li>
+<li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>WebRTC calling &amp; SMS</li>
+<li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Contact notes &amp; CRM</li>
+<li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Quote queue</li>
+<li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Email support</li>
+</ul>
+<div class="pcta"><button onclick="openModal('starter')" class="btn btn-g">Get Started</button></div>
+</div>
+<div class="pc pop anim d1">
+<div class="pbadge">MOST POPULAR</div>
+<h3>Professional</h3>
+<div class="pamt"><span class="dollar">$75</span><span class="per"> /user/mo</span></div>
+<div class="pdesc">For growing agencies that need advanced tools and priority support.</div>
+<ul class="pfeat">
+<li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Up to 15 users</li>
+<li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Everything in Starter</li>
+<li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Power dialer</li>
+<li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Custom roles &amp; permissions</li>
+<li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Advanced analytics</li>
+<li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Priority support</li>
+</ul>
+<div class="pcta"><button onclick="openModal('professional')" class="btn btn-p">Get Started</button></div>
+</div>
+<div class="pc anim d2">
+<h3>Enterprise</h3>
+<div class="pamt"><span class="dollar">$100</span><span class="per"> /user/mo</span></div>
+<div class="pdesc">For large agencies with custom needs and dedicated account management.</div>
+<ul class="pfeat">
+<li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Up to 20 users</li>
+<li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Everything in Professional</li>
+<li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>White-label options</li>
+<li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>API access</li>
+<li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Dedicated account manager</li>
+<li><svg class="ck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Custom integrations</li>
+</ul>
+<div class="pcta"><button onclick="openModal('enterprise')" class="btn btn-g">Get Started</button></div>
+</div>
+</div>
+<p class="pnote">Need 20+ users? <a href="mailto:sales@gocjx.com">Contact us for custom pricing &rarr;</a></p>
+<div style="text-align:center;margin-top:1.5rem"><div class="pvol anim">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--em)"><polyline points="20 6 9 17 4 12"/></svg>
+<span><strong>Volume discounts</strong> available &mdash; more users means a lower cost per seat. Save up to 20%.</span>
+</div></div>
+</div></section>
 
 <!-- CTA -->
-<section class="cta" id="contact">
-  <div class="ctab">
-    <h2>Ready to simplify<br>your agency?</h2>
-    <p>Get set up in a single day. We handle the migration personally — port your number, configure your team, and get you live.</p>
-    <div class="ctaa">
-      <a href="mailto:christianslatimer@outlook.com" class="btn btn-p">
-        <svg class="ic ic-s" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-        christianslatimer@outlook.com
-      </a>
-      <a href="tel:+16166996614" class="btn btn-o">
-        <svg class="ic ic-s" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-        (616) 699-6614
-      </a>
-    </div>
-  </div>
-</section>
+<section class="cta-s"><div class="ctn">
+<div class="cta-card anim">
+<h2>Ready to simplify your agency?</h2>
+<p>Get set up in a single day. We handle the migration personally &mdash; port your number, configure your team, and get you live.</p>
+<div class="cta-btns">
+<button onclick="openModal()" class="btn btn-w btn-lg">Join the Waitlist</button>
+<a href="mailto:sales@gocjx.com" class="btn btn-o btn-lg">Talk to Sales</a>
+</div>
+</div>
+</div></section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact"><div class="ctn">
+<div class="cgrid">
+<div class="ccard anim">
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+<h3>Support</h3>
+<a href="mailto:support@gocjx.com">support@gocjx.com</a>
+<p>Help with your existing account</p>
+</div>
+<div class="ccard anim d1">
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+<h3>Sales</h3>
+<a href="mailto:sales@gocjx.com">sales@gocjx.com</a>
+<p>Questions about plans &amp; features</p>
+</div>
+</div>
+</div></section>
 
 <!-- FOOTER -->
-<footer>
-  <div class="cjx" style="font-size:1.25rem"><span class="c">C</span><span class="j">j</span><span class="x">X</span></div>
-  <p>&copy; 2026 CJX Enterprise LLC. All rights reserved.</p>
-  <div style="display:flex;gap:2rem">
-    <a href="#">Privacy</a>
-    <a href="#">Terms</a>
-    <a href="mailto:christianslatimer@outlook.com">Contact</a>
-  </div>
-</footer>
+<footer class="footer"><div class="ctn foot-in">
+<div class="foot-c">&copy; <span id="yr"></span> CJX Enterprise LLC. All rights reserved.</div>
+<div style="font-family:var(--ff);font-weight:900;font-size:1.1rem;letter-spacing:-.02em"><span style="color:#fff">C</span><span style="color:var(--accl)">j</span><span style="color:var(--acc)">X</span></div>
+<div class="foot-l"><a href="mailto:support@gocjx.com">Contact</a><a href="#">Privacy</a><a href="#">Terms</a></div>
+</div></footer>
 
-<!-- INTEREST FORM MODAL -->
-<div class="mo" id="iModal">
-  <div class="md">
-    <div class="mh">
-      <h2>Get Started with <span class="cjx" style="font-size:1.2rem"><span class="c" style="color:#e8ecf4">C</span><span class="j">j</span><span class="x">X</span></span></h2>
-      <button class="mx" onclick="closeForm()">
-        <svg class="ic" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="mb" id="fC">
-      <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:1.5rem">Tell us about your agency and we'll reach out to get you set up.</p>
-      <div class="fr">
-        <div class="fg"><label>First Name *</label><input id="f1" placeholder="John"></div>
-        <div class="fg"><label>Last Name *</label><input id="f2" placeholder="Smith"></div>
-      </div>
-      <div class="fg"><label>Agency Name *</label><input id="f3" placeholder="Smith Insurance Agency"></div>
-      <div class="fr">
-        <div class="fg"><label>Work Email *</label><input id="f4" type="email" placeholder="john@smithinsurance.com"></div>
-        <div class="fg"><label>Phone Number *</label><input id="f5" placeholder="(555) 123-4567"></div>
-      </div>
-      <div class="fr">
-        <div class="fg"><label>Number of Users</label><select id="f6"><option value="">Select...</option><option>1–5</option><option>6–10</option><option>11–15</option><option>16–25</option><option>25+</option></select></div>
-        <div class="fg"><label>Interested Plan</label><select id="f7"><option value="">Not sure yet</option><option>Starter ($49/mo)</option><option>Professional ($99/mo)</option><option>Enterprise ($199/mo)</option></select></div>
-      </div>
-      <div class="fg"><label>What's your biggest pain point?</label><textarea id="f8" placeholder="e.g. We use 5 different tools and nothing talks to each other..."></textarea></div>
-      <div class="fg"><label>How did you hear about CJX?</label><select id="f9"><option value="">Select...</option><option>Referral</option><option>Google Search</option><option>Social Media</option><option>Industry Event</option><option>Other</option></select></div>
-      <button class="btn btn-p" style="width:100%;justify-content:center;padding:.85rem;font-size:.95rem;margin-top:.5rem" onclick="submitForm()">
-        <svg class="ic ic-s" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        Submit Interest
-      </button>
-    </div>
-    <div class="mb" id="fS" style="display:none">
-      <div class="fok">
-        <div class="oki">
-          <svg class="ic ic-l" style="color:var(--emerald)" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        </div>
-        <h3>We'll be in touch!</h3>
-        <p>Thanks for your interest. We'll reach out within 24 hours to discuss your agency's needs and get you set up.</p>
-        <button class="btn btn-o" style="margin-top:1.5rem" onclick="closeForm()">Close</button>
-      </div>
-    </div>
-  </div>
+<!-- GET STARTED MODAL -->
+<div class="mo" id="gsModal" onclick="if(event.target===this)closeModal()">
+<div class="modal">
+<button class="modal-x" onclick="closeModal()">&times;</button>
+<div id="mFormWrap">
+<div class="modal-h">
+<h2>Join the CJX Waitlist</h2>
+<p>Tell us about your agency. We'll reach out when your spot is ready.</p>
+</div>
+<div class="modal-body">
+<div class="modal-form">
+<form id="gsForm" onsubmit="handleSubmit(event)">
+<div class="fr">
+<div class="fg"><label>First Name *</label><input type="text" name="firstName" required placeholder="John"></div>
+<div class="fg"><label>Last Name *</label><input type="text" name="lastName" required placeholder="Smith"></div>
+</div>
+<div class="fg"><label>Agency Name *</label><input type="text" name="agencyName" required placeholder="Acme Insurance Agency"></div>
+<div class="fr">
+<div class="fg"><label>Work Email *</label><input type="email" name="email" required placeholder="john@acmeinsurance.com"></div>
+<div class="fg"><label>Phone Number *</label><input type="tel" name="phone" required placeholder="(555) 123-4567"></div>
+</div>
+<div class="fr">
+<div class="fg"><label>Number of Users</label>
+<select name="users" id="selUsers" onchange="updateCost()">
+<option value="1">1 user</option>
+<option value="2-5" selected>2-5 users</option>
+<option value="6-10">6-10 users</option>
+<option value="11-15">11-15 users</option>
+<option value="16-20">16-20 users</option>
+<option value="20+">20+ users (custom)</option>
+</select></div>
+<div class="fg"><label>Plan</label>
+<select name="plan" id="selPlan" onchange="updateCost()">
+<option value="starter">Starter &mdash; $50/user/mo</option>
+<option value="professional" selected>Professional &mdash; $75/user/mo</option>
+<option value="enterprise">Enterprise &mdash; $100/user/mo</option>
+</select></div>
+</div>
+<div class="fg"><label>Billing Cycle</label>
+<select name="billing" id="selBilling" onchange="updateCost()">
+<option value="monthly">Monthly</option>
+<option value="quarterly">Quarterly &mdash; Save 5%</option>
+<option value="semiannual">Semi-Annual &mdash; Save 10%</option>
+<option value="annual">Annual &mdash; Save 15%</option>
+</select></div>
+<div class="fg"><label>What's your biggest pain point?</label>
+<textarea name="painPoint" placeholder="e.g. We're juggling 4 different apps for calling, texting, and CRM..." rows="3"></textarea></div>
+<div class="fg"><label>How did you hear about CJX?</label>
+<select name="source">
+<option value="">Select...</option>
+<option>Referral</option>
+<option>Google Search</option>
+<option>Social Media</option>
+<option>Industry Event</option>
+<option>Other</option>
+</select></div>
+<button type="submit" class="btn btn-p btn-lg" style="width:100%;margin-top:.5rem">Join Waitlist &rarr;</button>
+</form>
+</div>
+<div class="modal-side" id="costSide">
+<div class="cost-t">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+Cost Breakdown
+</div>
+<div id="costLines"></div>
+<div class="cost-tot"><div class="amt" id="costTotal">$375</div><div class="per" id="costPer">/month</div></div>
+<div class="cost-sv" id="costSave" style="display:none"></div>
+</div>
+</div>
+</div>
+<div class="modal-ok" id="mSuccess">
+<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+<h3>You're on the list!</h3>
+<p>Thanks for your interest in CJX. We'll reach out when your spot is ready to discuss your agency's needs and get you set up.</p>
+<button onclick="closeModal()" class="btn btn-p btn-lg" style="margin-top:2rem">Close</button>
+</div>
+</div>
 </div>
 
 <script>
-const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.style.animationPlayState='running'})},{threshold:.1});
-document.querySelectorAll('.anim').forEach(e=>{e.style.animationPlayState='paused';obs.observe(e)});
-document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',function(e){if(this.getAttribute('href')==='#')return;e.preventDefault();const t=document.querySelector(this.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth',block:'start'})})});
+document.getElementById('yr').textContent=new Date().getFullYear();
+var nav=document.getElementById('nav');
+window.addEventListener('scroll',function(){nav.classList.toggle('scrolled',window.scrollY>40)});
+var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('vis');obs.unobserve(e.target)}})},{threshold:.1});
+document.querySelectorAll('.anim').forEach(function(el){obs.observe(el)});
 
-function openForm(){document.getElementById('iModal').classList.add('open');document.getElementById('fC').style.display='';document.getElementById('fS').style.display='none';document.body.style.overflow='hidden'}
-function closeForm(){document.getElementById('iModal').classList.remove('open');document.body.style.overflow=''}
-function submitForm(){
-  const v=id=>document.getElementById(id).value.trim();
-  if(!v('f1')||!v('f2')||!v('f3')||!v('f4')||!v('f5')){alert('Please fill in all required fields.');return}
-  console.log('Interest:',{name:v('f1')+' '+v('f2'),agency:v('f3'),email:v('f4'),phone:v('f5'),users:v('f6'),plan:v('f7'),pain:v('f8'),source:v('f9')});
-  document.getElementById('fC').style.display='none';document.getElementById('fS').style.display='';
+function openModal(plan){
+  document.getElementById('gsModal').classList.add('open');
+  document.body.style.overflow='hidden';
+  document.getElementById('mFormWrap').style.display='';
+  document.getElementById('mSuccess').style.display='none';
+  if(plan){document.getElementById('selPlan').value=plan;updateCost()}
 }
-document.getElementById('iModal').addEventListener('click',function(e){if(e.target===this)closeForm()});
+function closeModal(){
+  document.getElementById('gsModal').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+var plans={starter:{name:'Starter',base:50},professional:{name:'Professional',base:75},enterprise:{name:'Enterprise',base:100}};
+var userTiers={'1':{max:1,disc:0},'2-5':{max:5,disc:.05},'6-10':{max:10,disc:.10},'11-15':{max:15,disc:.15},'16-20':{max:20,disc:.20},'20+':{max:0,disc:null}};
+var billOpts={monthly:{label:'Monthly',disc:0,months:1,per:'/month'},quarterly:{label:'Quarterly',disc:.05,months:3,per:'/quarter'},semiannual:{label:'Semi-Annual',disc:.10,months:6,per:'/6 months'},annual:{label:'Annual',disc:.15,months:12,per:'/year'}};
+
+function updateCost(){
+  var plan=plans[document.getElementById('selPlan').value];
+  var users=userTiers[document.getElementById('selUsers').value];
+  var bill=billOpts[document.getElementById('selBilling').value];
+  var lines=document.getElementById('costLines');
+  var total=document.getElementById('costTotal');
+  var per=document.getElementById('costPer');
+  var save=document.getElementById('costSave');
+  if(users.disc===null){
+    lines.innerHTML='<div style="text-align:center;padding:2rem 0;color:var(--t2);font-size:.88rem">20+ users requires a custom quote.<br><a href="mailto:sales@gocjx.com" style="color:var(--accl);font-weight:600;margin-top:.5rem;display:inline-block">Contact sales@gocjx.com</a></div>';
+    total.textContent='Custom';per.textContent='Contact us';save.style.display='none';return;
+  }
+  var base=plan.base;
+  var afterUser=base*(1-users.disc);
+  var afterBill=afterUser*(1-bill.disc);
+  var num=users.max;
+  var mo=Math.round(afterBill*num*100)/100;
+  var billTotal=Math.round(mo*bill.months*100)/100;
+  var savings=Math.round((base-afterBill)*num*100)/100;
+  var h='<div class="cl"><span class="k">Plan</span><span class="vv">'+plan.name+'</span></div>';
+  h+='<div class="cl"><span class="k">Base price</span><span class="vv">$'+base+'/user/mo</span></div>';
+  if(users.disc>0)h+='<div class="cl"><span class="k">Volume discount ('+document.getElementById('selUsers').value+')</span><span class="vv grn">-'+(users.disc*100)+'%</span></div>';
+  if(bill.disc>0)h+='<div class="cl"><span class="k">'+bill.label+' discount</span><span class="vv grn">-'+(bill.disc*100)+'%</span></div>';
+  h+='<div class="cl"><span class="k">Per user/month</span><span class="vv">$'+afterBill.toFixed(2)+'</span></div>';
+  h+='<div class="cl"><span class="k">&times; '+num+' users</span><span class="vv">$'+mo.toFixed(2)+'/mo</span></div>';
+  lines.innerHTML=h;
+  total.textContent='$'+billTotal.toLocaleString();
+  per.textContent=bill.per;
+  if(savings>0){save.textContent='You save $'+savings.toFixed(2)+'/mo vs. base price';save.style.display='block'}else{save.style.display='none'}
+}
+updateCost();
+
+function handleSubmit(e){
+  e.preventDefault();
+  var f=new FormData(document.getElementById('gsForm'));
+  var subj=encodeURIComponent('CJX Waitlist: '+f.get('agencyName'));
+  var body=encodeURIComponent('Name: '+f.get('firstName')+' '+f.get('lastName')+'\nAgency: '+f.get('agencyName')+'\nEmail: '+f.get('email')+'\nPhone: '+f.get('phone')+'\nUsers: '+f.get('users')+'\nPlan: '+f.get('plan')+'\nBilling: '+f.get('billing')+'\nPain Point: '+(f.get('painPoint')||'N/A')+'\nSource: '+(f.get('source')||'N/A'));
+  window.location.href='mailto:sales@gocjx.com?subject='+subj+'&body='+body;
+  document.getElementById('mFormWrap').style.display='none';
+  document.getElementById('mSuccess').style.display='block';
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal()});
 </script>
 
+<!-- CJX AI ASSISTANT -->
+<style>
+.chat-fab{position:fixed;bottom:2rem;right:2rem;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--acc),#0284c7);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 24px rgba(14,165,233,.35);z-index:150;transition:all .25s;border:none;font-family:var(--fb)}
+.chat-fab:hover{transform:scale(1.08);box-shadow:0 6px 32px rgba(14,165,233,.45)}
+.chat-fab.open{border-radius:16px;width:48px;height:48px}
+.chat-fab svg{width:28px;height:28px;transition:transform .2s}
+.chat-fab.open svg{transform:rotate(90deg)}
+.chat-badge{position:absolute;top:-2px;right:-2px;width:14px;height:14px;background:var(--em);border-radius:50%;border:2px solid var(--bg)}
+
+.chat-win{position:fixed;bottom:6.5rem;right:2rem;width:380px;max-height:520px;background:var(--bg2);border:1px solid var(--bdr);border-radius:20px;z-index:150;display:none;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 40px rgba(14,165,233,.05);animation:fadeUp .3s ease-out}
+.chat-win.open{display:flex}
+.chat-hdr{padding:1rem 1.25rem;background:linear-gradient(135deg,rgba(14,165,233,.12),rgba(99,102,241,.06));border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:.75rem}
+.chat-av{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--acc),#0284c7);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chat-av svg{width:18px;height:18px;color:#fff}
+.chat-hdr-t h4{font-family:var(--ff);font-size:.9rem;font-weight:700;margin:0;line-height:1.2}
+.chat-hdr-t p{font-size:.7rem;color:var(--t3);margin:0;margin-top:1px}
+.chat-msgs{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.75rem;min-height:280px;max-height:340px}
+.chat-msg{max-width:85%;padding:.7rem 1rem;border-radius:14px;font-size:.82rem;line-height:1.55;word-wrap:break-word}
+.chat-msg.bot{background:rgba(255,255,255,.05);border:1px solid var(--bdr);color:var(--t2);align-self:flex-start;border-bottom-left-radius:4px}
+.chat-msg.user{background:linear-gradient(135deg,var(--acc),#0284c7);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.chat-msg a{color:var(--accl);text-decoration:underline}
+.chat-msg.user a{color:#fff}
+.chat-typing{align-self:flex-start;padding:.7rem 1rem;background:rgba(255,255,255,.05);border:1px solid var(--bdr);border-radius:14px;border-bottom-left-radius:4px;display:none;gap:4px;align-items:center}
+.chat-typing.show{display:flex}
+.chat-typing span{width:6px;height:6px;background:var(--t3);border-radius:50%;animation:typeDot 1.4s infinite}
+.chat-typing span:nth-child(2){animation-delay:.2s}
+.chat-typing span:nth-child(3){animation-delay:.4s}
+@keyframes typeDot{0%,60%,100%{opacity:.3;transform:scale(.8)}30%{opacity:1;transform:scale(1)}}
+.chat-input{padding:.75rem 1rem;border-top:1px solid var(--bdr);display:flex;gap:.5rem;align-items:center;background:rgba(0,0,0,.2)}
+.chat-input input{flex:1;padding:.55rem .8rem;background:rgba(255,255,255,.05);border:1px solid var(--bdr);border-radius:10px;color:#fff;font-family:var(--fb);font-size:.82rem;outline:none;transition:border-color .2s}
+.chat-input input:focus{border-color:var(--acc)}
+.chat-input input::placeholder{color:var(--t3)}
+.chat-input button{width:34px;height:34px;border-radius:10px;background:var(--acc);color:#fff;display:flex;align-items:center;justify-content:center;transition:all .2s;border:none;cursor:pointer;flex-shrink:0}
+.chat-input button:hover{background:#0284c7}
+.chat-input button:disabled{opacity:.3;cursor:default}
+.chat-disc{padding:.5rem 1rem;font-size:.62rem;color:var(--t3);text-align:center;border-top:1px solid var(--bdr);background:rgba(0,0,0,.15);line-height:1.4}
+@media(max-width:480px){.chat-win{right:.75rem;left:.75rem;width:auto;bottom:5.5rem;max-height:70vh}.chat-fab{bottom:1.25rem;right:1.25rem}}
+</style>
+
+<button class="chat-fab" id="chatFab" onclick="toggleChat()" aria-label="Open AI Assistant">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+<div class="chat-badge" id="chatBadge"></div>
+</button>
+
+<div class="chat-win" id="chatWin">
+<div class="chat-hdr">
+<div class="chat-av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 014 4v2a4 4 0 01-8 0V6a4 4 0 014-4z"/><path d="M18 14v1a6 6 0 01-12 0v-1"/><line x1="12" y1="22" x2="12" y2="18"/></svg></div>
+<div class="chat-hdr-t"><h4>CJX Assistant</h4><p>Ask me anything about CJX</p></div>
+</div>
+<div class="chat-msgs" id="chatMsgs">
+<div class="chat-msg bot">Hi there! I'm the CJX assistant. I can help with questions about our platform, pricing, features, or password resets. How can I help you today?</div>
+</div>
+<div class="chat-typing" id="chatTyping"><span></span><span></span><span></span></div>
+<div class="chat-input">
+<input type="text" id="chatIn" placeholder="Type a message..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}" autocomplete="off">
+<button onclick="sendChat()" id="chatSend" aria-label="Send"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+</div>
+<div class="chat-disc">AI assistant &middot; May make mistakes &middot; Not legal/financial advice &middot; CJX topics only</div>
+</div>
+
+<script>
+var chatOpen=false,chatHistory=[],chatBusy=false;
+function toggleChat(){
+  chatOpen=!chatOpen;
+  document.getElementById('chatWin').classList.toggle('open',chatOpen);
+  document.getElementById('chatFab').classList.toggle('open',chatOpen);
+  document.getElementById('chatBadge').style.display='none';
+  if(chatOpen)document.getElementById('chatIn').focus();
+}
+
+function addMsg(text,role){
+  var d=document.getElementById('chatMsgs');
+  var m=document.createElement('div');
+  m.className='chat-msg '+(role==='user'?'user':'bot');
+  m.innerHTML=text;
+  d.appendChild(m);
+  d.scrollTop=d.scrollHeight;
+}
+
+function sendChat(){
+  if(chatBusy)return;
+  var input=document.getElementById('chatIn');
+  var text=input.value.trim();
+  if(!text)return;
+  input.value='';
+  addMsg(text.replace(/</g,'&lt;').replace(/>/g,'&gt;'),'user');
+  chatHistory.push({role:'user',content:text});
+  chatBusy=true;
+  document.getElementById('chatSend').disabled=true;
+  document.getElementById('chatTyping').classList.add('show');
+  document.getElementById('chatMsgs').scrollTop=document.getElementById('chatMsgs').scrollHeight;
+
+  var sysPrompt=''; // system prompt lives on the server now
+
+  fetch('https://cjx-backend-production-5cad.up.railway.app/api/chat',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      messages:chatHistory.slice(-10)
+    })
+  })
+  .then(function(r){return r.json()})
+  .then(function(data){
+    var reply='';
+    if(data.success&&data.reply)reply=data.reply;
+    else reply=data.error||"I'm sorry, I wasn't able to process that. Please try again or contact support@gocjx.com for help.";
+    reply=reply.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    reply=reply.replace(/\n/g,'<br>');
+    // linkify emails
+    reply=reply.replace(/([\w.-]+@gocjx\.com)/g,'<a href="mailto:$1">$1</a>');
+    // linkify app.gocjx.com
+    reply=reply.replace(/app\.gocjx\.com/g,'<a href="https://app.gocjx.com" target="_blank">app.gocjx.com</a>');
+    chatHistory.push({role:'assistant',content:data.reply||reply});
+    addMsg(reply,'bot');
+  })
+  .catch(function(){
+    addMsg("I'm sorry, I'm having trouble connecting right now. Please try again in a moment, or reach out to <a href='mailto:support@gocjx.com'>support@gocjx.com</a> for immediate help.",'bot');
+  })
+  .finally(function(){
+    chatBusy=false;
+    document.getElementById('chatSend').disabled=false;
+    document.getElementById('chatTyping').classList.remove('show');
+  });
+}
+
+// Show badge after 3 seconds
+setTimeout(function(){
+  if(!chatOpen)document.getElementById('chatBadge').style.display='block';
+},3000);
+</script>
 </body>
 </html>
