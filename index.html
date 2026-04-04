@@ -233,7 +233,7 @@ Login</a>
 <div class="trust-lbl">Built different from generic CRMs</div>
 <div class="trust-row">
 <div class="trust-s anim"><div class="num">6<span>+</span></div><div class="lbl">Core Apps, One Platform</div></div>
-<div class="trust-s anim d1"><div class="num">0</div><div class="lbl">Desk Phones Required</div></div>
+<div class="trust-s anim d1"><div class="num">2<span> min</span></div><div class="lbl">Phone Provisioning</div></div>
 <div class="trust-s anim d2"><div class="num">1<span> day</span></div><div class="lbl">Setup &amp; Onboarding</div></div>
 <div class="trust-s anim d3"><div class="num">24<span>/7</span></div><div class="lbl">Cloud Availability</div></div>
 </div>
@@ -254,13 +254,13 @@ Login</a>
 <div class="psb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>Quick Quote</div>
 </div>
 <div class="prev-main">
-<div class="pm"><div class="l">Today's Calls</div><div class="v" style="color:var(--accl)">127</div><div class="c">&uarr; 12% from yesterday</div></div>
-<div class="pm"><div class="l">Messages</div><div class="v" style="color:var(--vio)">43</div><div class="c">3 unread</div></div>
-<div class="pm"><div class="l">Active Quotes</div><div class="v" style="color:var(--am)">8</div><div class="c">2 new today</div></div>
+<div class="pm"><div class="l">Calls</div><div class="v" style="color:var(--accl)">—</div><div class="c">Real-time tracking</div></div>
+<div class="pm"><div class="l">Messages</div><div class="v" style="color:var(--vio)">—</div><div class="c">Two-way SMS</div></div>
+<div class="pm"><div class="l">Quotes</div><div class="v" style="color:var(--am)">—</div><div class="c">Queue management</div></div>
 <div class="prev-list">
-<div class="pli"><div class="n">Sarah Johnson</div><div class="t" style="background:rgba(16,185,129,.12);color:var(--em)">Auto + Home</div></div>
-<div class="pli"><div class="n">Mike Chen</div><div class="t" style="background:rgba(245,158,11,.12);color:var(--am)">BOP Quote</div></div>
-<div class="pli"><div class="n">Emily Rodriguez</div><div class="t" style="background:rgba(14,165,233,.12);color:var(--accl)">Renewal</div></div>
+<div class="pli"><div class="n">Click-to-dial from browser</div><div class="t" style="background:rgba(16,185,129,.12);color:var(--em)">Calling</div></div>
+<div class="pli"><div class="n">Contact notes & activity tracking</div><div class="t" style="background:rgba(245,158,11,.12);color:var(--am)">CRM</div></div>
+<div class="pli"><div class="n">Microsoft 365 calendar sync</div><div class="t" style="background:rgba(14,165,233,.12);color:var(--accl)">Integration</div></div>
 </div>
 </div>
 </div>
@@ -279,7 +279,7 @@ Login</a>
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 013.09 5.18 2 2 0 015.11 3h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 11.91a16 16 0 006 6l2.27-2.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
 </div>
 <h3>WebRTC Calling</h3>
-<p>Make and receive calls directly in the browser. No desk phones needed. Call logging, transfer, hold, and mute &mdash; all built in.</p>
+<p>Click-to-dial from CJX, answer on your desk phone. Call logging, ringback, bridge, and mute &mdash; all built in.</p>
 </div>
 <div class="fc anim d1">
 <div class="fi" style="background:rgba(139,92,246,.1);color:var(--vio)">
@@ -583,7 +583,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal()
 .chat-fab:hover{transform:scale(1.08);box-shadow:0 6px 32px rgba(14,165,233,.45)}
 .chat-fab.open{border-radius:16px;width:48px;height:48px}
 .chat-fab svg{width:28px;height:28px;transition:transform .2s}
-.chat-fab.open svg{transform:rotate(90deg)}
+.chat-fab.open svg{transform:none}
 .chat-badge{position:absolute;top:-2px;right:-2px;width:14px;height:14px;background:var(--em);border-radius:50%;border:2px solid var(--bg)}
 
 .chat-win{position:fixed;bottom:6.5rem;right:2rem;width:380px;max-height:520px;background:var(--bg2);border:1px solid var(--bdr);border-radius:20px;z-index:150;display:none;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 40px rgba(14,165,233,.05);animation:fadeUp .3s ease-out}
@@ -624,7 +624,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal()
 <div class="chat-win" id="chatWin">
 <div class="chat-hdr">
 <div class="chat-av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 014 4v2a4 4 0 01-8 0V6a4 4 0 014-4z"/><path d="M18 14v1a6 6 0 01-12 0v-1"/><line x1="12" y1="22" x2="12" y2="18"/></svg></div>
-<div class="chat-hdr-t"><h4>CJX Assistant</h4><p>Ask me anything about CJX</p></div>
+<div class="chat-hdr-t"><h4 style="display:flex;align-items:center;gap:6px"><span style="font-family:var(--ff);font-size:16px;font-weight:800;letter-spacing:-0.5px"><span style="color:#0ea5e9">cj</span><span style="color:#fff">X</span></span><span style="color:rgba(255,255,255,0.3);font-size:14px">/</span><span style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.7)">AI Assistant</span></h4><p>Ask about CJX — pricing, features, setup</p></div>
 </div>
 <div class="chat-msgs" id="chatMsgs">
 <div class="chat-msg bot">Hi there! I'm the CJX assistant. I can help with questions about our platform, pricing, features, or password resets. How can I help you today?</div>
@@ -671,7 +671,7 @@ function sendChat(){
 
   var sysPrompt=''; // system prompt lives on the server now
 
-  fetch('https://cjx-backend-production-5cad.up.railway.app/api/chat',{
+  fetch('https://api.gocjx.com/api/chat',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
