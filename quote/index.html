@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quote Request</title>
+  <link rel="icon" type="image/svg+xml" href="/quote/cjx-favicon.svg">
+  <title>Online Quoting</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>body { font-family: 'Outfit', sans-serif; } .spinner { border: 3px solid #e2e8f0; border-top-color: #0ea5e9; border-radius: 50%; width: 40px; height: 40px; animation: spin 0.8s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } } .fade-in { animation: fadeIn 0.3s ease-in; } @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }</style>
@@ -65,6 +66,7 @@
     function renderForm(data, slug) {
       const ag = data.agency;
       const sections = data.sections || [];
+      document.title = (ag.agency_name || 'Agency') + ' Online Quoting';
       const bgColor = ag.background_color || '#f8fafc';
       const hc1 = ag.header_color || '#0ea5e9';
       const hc2 = ag.header_color_2 || hc1;
