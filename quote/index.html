@@ -7,320 +7,383 @@
   <title>Online Quoting</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>body { font-family: 'Outfit', sans-serif; } .spinner { border: 3px solid #e2e8f0; border-top-color: #0ea5e9; border-radius: 50%; width: 40px; height: 40px; animation: spin 0.8s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } } .fade-in { animation: fadeIn 0.3s ease-in; } @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }</style>
+  <style>
+    body { font-family: 'Outfit', sans-serif; background: #f8fafc; }
+    .spinner { border: 3px solid #e2e8f0; border-top-color: #0ea5e9; border-radius: 50%; width: 40px; height: 40px; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .fade-in { animation: fadeIn 0.35s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .progress-bar { transition: width 0.4s ease; }
+    .ms-toggle.active { box-shadow: 0 0 0 2px var(--brand); background: color-mix(in srgb, var(--brand) 8%, white); }
+  </style>
 </head>
 <body class="min-h-screen">
   <div id="app"></div>
+
   <script>
-    const API = 'https://api.gocjx.com/api/quoting/form';
-    const SENSITIVE_RE = /ssn|social.?security|ein|tax.?id|passport|driver.?licen|government.?id/i;
+    const API_BASE = 'https://api.gocjx.com/api/quote';
     const app = document.getElementById('app');
 
+    let cfg = null;       // API response
+    let slug = '';
+    let currentStep = 0;  // 0=welcome, 1..N=sections, N+1=confirm, N+2=thanks
+    let answers = {};     // { sectionId: { questionId: value } }
+    let activeSections = [];
+
+    // --- Helpers ---
     function getSlug() {
       const parts = window.location.pathname.replace(/\/+$/, '').split('/');
       return parts[parts.length - 1] === 'quote' ? '' : parts[parts.length - 1];
     }
+    function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 
-    function esc(str) {
-      const d = document.createElement('div');
-      d.textContent = str || '';
-      return d.innerHTML;
-    }
-
-    function showLoading() {
-      app.innerHTML = '<div class="flex items-center justify-center min-h-screen bg-slate-50"><div class="spinner"></div></div>';
-    }
-
-    function showError(msg) {
-      app.innerHTML = '<div class="flex items-center justify-center min-h-screen bg-slate-50"><div class="text-center"><div class="text-6xl mb-4 text-slate-300">!</div><h1 class="text-2xl font-bold text-slate-700 mb-2">' + esc(msg) + '</h1><p class="text-slate-500">Please check the URL and try again.</p></div></div>';
-    }
-
-    function showSuccess(agencyName) {
-      app.innerHTML = '<div class="flex items-center justify-center min-h-screen bg-slate-50"><div class="text-center fade-in"><div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4"><svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div><h1 class="text-2xl font-bold text-slate-800 mb-2">Thank you!</h1><p class="text-slate-600">Your quote request has been submitted.</p><p class="text-sm text-slate-400 mt-2">' + esc(agencyName) + ' will be in touch soon.</p></div></div>';
-    }
-
+    // --- Init ---
     async function init() {
-      const slug = getSlug();
+      slug = getSlug();
       if (!slug) { showError('Form not found'); return; }
       showLoading();
-
-      let data;
       try {
-        const res = await fetch(API + '/' + encodeURIComponent(slug));
+        const res = await fetch(`${API_BASE}/${encodeURIComponent(slug)}`);
         if (!res.ok) { showError('Form not found'); return; }
-        data = await res.json();
-        if (!data.success) { showError('Form not found'); return; }
+        cfg = await res.json();
+        if (cfg.error) { showError(cfg.error); return; }
       } catch (e) {
         showError('Unable to load form. Please try again later.');
         return;
       }
+      document.title = (cfg.agencyName || 'Agency') + ' - Get a Quote';
+      document.documentElement.style.setProperty('--brand', cfg.buttonColor || cfg.primaryColor || '#0ea5e9');
+      computeActiveSections();
+      render();
+    }
 
-      if (data.is_live === false) {
-        app.innerHTML = '<div class="flex items-center justify-center min-h-screen bg-slate-50"><div class="text-center py-20"><h2 class="text-xl font-bold text-slate-700 mb-2">Form Not Available</h2><p class="text-slate-500">This form is currently private. Please contact the agency directly.</p></div></div>';
+    function computeActiveSections() {
+      const sections = (cfg.config && cfg.config.sections) || [];
+      activeSections = sections.filter(sec => {
+        if (!sec.activatedBy) return true;
+        const parentSection = sections.find(s => s.questions && s.questions.some(q => q.id === sec.activatedBy.questionId));
+        if (!parentSection) return true;
+        const val = (answers[parentSection.id] || {})[sec.activatedBy.questionId];
+        return val && sec.activatedBy.values.includes(val);
+      });
+    }
+
+    function totalSteps() { return activeSections.length + 2; } // welcome + sections + confirm
+    function progressPct() {
+      if (currentStep === 0) return 0;
+      if (currentStep > activeSections.length) return 100;
+      return Math.round((currentStep / (activeSections.length + 1)) * 100);
+    }
+
+    // --- Screens ---
+    function showLoading() {
+      app.innerHTML = '<div class="flex items-center justify-center min-h-screen"><div class="spinner"></div></div>';
+    }
+    function showError(msg) {
+      app.innerHTML = `<div class="flex items-center justify-center min-h-screen"><div class="text-center px-6"><div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4"><svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M12 3a9 9 0 100 18 9 9 0 000-18z"/></svg></div><h1 class="text-xl font-bold text-slate-700 mb-2">${esc(msg)}</h1><p class="text-slate-500 text-sm">Please check the URL and try again.</p></div></div>`;
+    }
+
+    function render() {
+      if (currentStep === 0) renderWelcome();
+      else if (currentStep <= activeSections.length) renderSection(activeSections[currentStep - 1]);
+      else if (currentStep === activeSections.length + 1) renderConfirm();
+      else renderThankYou();
+    }
+
+    function shell(inner, showProgress) {
+      const pc = cfg.primaryColor || '#0ea5e9';
+      const ac = cfg.accentColor || pc;
+      const grad = pc === ac ? pc : `linear-gradient(135deg, ${pc}, ${ac})`;
+      let h = '';
+      // Header
+      h += `<div class="py-5 px-6 text-white" style="background:${grad};">`;
+      h += `<div class="max-w-lg mx-auto flex items-center gap-3">`;
+      if (cfg.logoUrl) h += `<img src="${esc(cfg.logoUrl)}" alt="Logo" class="w-10 h-10 rounded-lg object-cover bg-white/20 shadow" />`;
+      h += `<span class="text-lg font-bold">${esc(cfg.agencyName)}</span>`;
+      h += `</div></div>`;
+      // Progress
+      if (showProgress) {
+        h += `<div class="max-w-lg mx-auto px-6 mt-4"><div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden"><div class="progress-bar h-2 rounded-full" style="width:${progressPct()}%;background:${cfg.buttonColor || pc};"></div></div><p class="text-xs text-slate-400 mt-1 text-right">${progressPct()}% complete</p></div>`;
+      }
+      // Body
+      h += `<div class="max-w-lg mx-auto px-6 py-8 fade-in">${inner}</div>`;
+      // Footer
+      h += poweredFooter();
+      app.innerHTML = h;
+    }
+
+    function poweredFooter() {
+      return `<div style="text-align:center;padding:20px 0 12px;"><div style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#0f172a;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,0.15);"><span style="font-size:11px;color:#94a3b8;font-weight:500;">Powered by</span><span style="letter-spacing:-0.04em;font-weight:900;font-size:13px;"><span style="color:#ffffff;">C</span><span style="color:#38bdf8;font-weight:800;">j</span><span style="color:#0ea5e9;">X</span></span></div></div>`;
+    }
+
+    function brandBtn(text, extra) {
+      const bc = cfg.buttonColor || cfg.primaryColor || '#0ea5e9';
+      return `<button type="button" ${extra || ''} class="px-8 py-3 text-white font-semibold rounded-xl shadow-sm hover:shadow-md transition-all text-sm" style="background:${bc};">${esc(text)}</button>`;
+    }
+
+    function backBtn() {
+      return `<button type="button" onclick="goBack()" class="px-6 py-3 text-slate-600 font-semibold rounded-xl border border-slate-300 hover:bg-slate-50 transition-all text-sm">Back</button>`;
+    }
+
+    // --- Welcome ---
+    function renderWelcome() {
+      let h = `<div class="text-center py-12">`;
+      if (cfg.logoUrl) h += `<img src="${esc(cfg.logoUrl)}" alt="Logo" class="w-20 h-20 rounded-2xl object-cover mx-auto mb-6 shadow-lg" />`;
+      h += `<h1 class="text-2xl font-bold text-slate-800 mb-2">${esc(cfg.agencyName)}</h1>`;
+      h += `<p class="text-slate-500 mb-8">Let's get the process started.</p>`;
+      h += `<div>${brandBtn('Get My Quote', 'onclick="nextStep()"')}</div>`;
+      h += `</div>`;
+      shell(h, false);
+    }
+
+    // --- Section form ---
+    function renderSection(section) {
+      if (!answers[section.id]) answers[section.id] = {};
+      let h = `<h2 class="text-xl font-bold text-slate-800 mb-6">${esc(section.title)}</h2>`;
+      h += `<div class="space-y-5">`;
+      for (const q of (section.questions || [])) {
+        h += renderQuestion(section.id, q);
+      }
+      h += `</div>`;
+      h += `<div id="section-errors" class="hidden mt-4 text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-3"></div>`;
+      h += `<div class="flex justify-between mt-8">`;
+      h += backBtn();
+      h += brandBtn('Continue', 'onclick="validateAndNext()"');
+      h += `</div>`;
+      shell(h, true);
+      hydrateSection(section);
+    }
+
+    function renderQuestion(secId, q) {
+      const val = answers[secId]?.[q.id];
+      const req = q.required ? ' <span class="text-rose-500">*</span>' : '';
+      let h = `<div data-qid="${q.id}">`;
+      h += `<label class="block text-sm font-semibold text-slate-700 mb-1.5">${esc(q.label)}${req}</label>`;
+
+      if (q.type === 'text') {
+        h += `<input type="text" data-field="${q.id}" value="${esc(val || '')}" placeholder="${esc(q.placeholder || '')}" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:border-transparent" style="--tw-ring-color:${cfg.buttonColor || '#0ea5e9'}" />`;
+      }
+      else if (q.type === 'number') {
+        h += `<input type="number" data-field="${q.id}" value="${esc(val || '')}" placeholder="${esc(q.placeholder || '')}" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:border-transparent" style="--tw-ring-color:${cfg.buttonColor || '#0ea5e9'}" />`;
+      }
+      else if (q.type === 'date') {
+        h += `<input type="date" data-field="${q.id}" value="${esc(val || '')}" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:border-transparent" style="--tw-ring-color:${cfg.buttonColor || '#0ea5e9'}" />`;
+      }
+      else if (q.type === 'yesno') {
+        const yActive = val === 'yes' ? 'active' : '';
+        const nActive = val === 'no' ? 'active' : '';
+        h += `<div class="flex gap-3"><button type="button" data-yn="${q.id}" data-val="yes" class="ms-toggle ${yActive} flex-1 py-2.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all" style="--brand:${cfg.buttonColor || '#0ea5e9'}">Yes</button>`;
+        h += `<button type="button" data-yn="${q.id}" data-val="no" class="ms-toggle ${nActive} flex-1 py-2.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all" style="--brand:${cfg.buttonColor || '#0ea5e9'}">No</button></div>`;
+      }
+      else if (q.type === 'select') {
+        h += `<select data-field="${q.id}" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:border-transparent" style="--tw-ring-color:${cfg.buttonColor || '#0ea5e9'}"><option value="">Select...</option>`;
+        for (const o of (q.options || [])) {
+          const sel = val === o ? ' selected' : '';
+          h += `<option value="${esc(o)}"${sel}>${esc(o)}</option>`;
+        }
+        h += `</select>`;
+      }
+      else if (q.type === 'multiselect') {
+        const selected = Array.isArray(val) ? val : [];
+        h += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">`;
+        for (const o of (q.options || [])) {
+          const optVal = typeof o === 'object' ? o.value : o;
+          const optLabel = typeof o === 'object' ? o.label : o;
+          const isActive = selected.includes(optVal) ? 'active' : '';
+          h += `<button type="button" data-ms="${q.id}" data-val="${esc(optVal)}" class="ms-toggle ${isActive} px-4 py-2.5 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all text-left" style="--brand:${cfg.buttonColor || '#0ea5e9'}">${esc(optLabel)}</button>`;
+        }
+        h += `</div>`;
+      }
+      h += `<p class="field-error text-xs text-rose-500 mt-1 hidden"></p>`;
+      h += `</div>`;
+      return h;
+    }
+
+    function hydrateSection(section) {
+      const secId = section.id;
+      // Text / number / date / select inputs
+      document.querySelectorAll('[data-field]').forEach(el => {
+        el.addEventListener('input', () => { answers[secId][el.dataset.field] = el.value; recomputeIfNeeded(el.dataset.field); });
+        el.addEventListener('change', () => { answers[secId][el.dataset.field] = el.value; recomputeIfNeeded(el.dataset.field); });
+      });
+      // Yes/No
+      document.querySelectorAll('[data-yn]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const qid = btn.dataset.yn;
+          answers[secId][qid] = btn.dataset.val;
+          document.querySelectorAll(`[data-yn="${qid}"]`).forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          recomputeIfNeeded(qid);
+        });
+      });
+      // Multiselect
+      document.querySelectorAll('[data-ms]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const qid = btn.dataset.ms;
+          if (!answers[secId][qid]) answers[secId][qid] = [];
+          const val = btn.dataset.val;
+          const arr = answers[secId][qid];
+          const idx = arr.indexOf(val);
+          if (idx >= 0) { arr.splice(idx, 1); btn.classList.remove('active'); }
+          else { arr.push(val); btn.classList.add('active'); }
+        });
+      });
+    }
+
+    function recomputeIfNeeded(qid) {
+      const sections = (cfg.config && cfg.config.sections) || [];
+      const hasDependent = sections.some(s => s.activatedBy && s.activatedBy.questionId === qid);
+      if (hasDependent) {
+        const oldLen = activeSections.length;
+        computeActiveSections();
+        if (activeSections.length !== oldLen && currentStep > activeSections.length) {
+          currentStep = activeSections.length + 1;
+        }
+      }
+    }
+
+    // --- Validation ---
+    function validateAndNext() {
+      const section = activeSections[currentStep - 1];
+      const secAnswers = answers[section.id] || {};
+      let errors = [];
+      const errBox = document.getElementById('section-errors');
+      // Clear previous
+      document.querySelectorAll('.field-error').forEach(e => { e.classList.add('hidden'); e.textContent = ''; });
+      for (const q of (section.questions || [])) {
+        if (!q.required) continue;
+        const val = secAnswers[q.id];
+        let invalid = false;
+        if (q.type === 'multiselect') {
+          invalid = !val || !Array.isArray(val) || val.length === 0;
+        } else {
+          invalid = !val || (typeof val === 'string' && val.trim() === '');
+        }
+        if (invalid) {
+          errors.push(q.label);
+          const wrap = document.querySelector(`[data-qid="${q.id}"] .field-error`);
+          if (wrap) { wrap.textContent = 'This field is required'; wrap.classList.remove('hidden'); }
+        }
+      }
+      if (errors.length > 0) {
+        errBox.classList.remove('hidden');
+        errBox.textContent = 'Please complete all required fields.';
         return;
       }
-
-      renderForm(data, slug);
+      errBox.classList.add('hidden');
+      nextStep();
     }
 
-    function renderForm(data, slug) {
-      const ag = data.agency;
-      const sections = data.sections || [];
-      document.title = (ag.agency_name || 'Agency') + ' Online Quoting';
-      const bgColor = ag.background_color || '#f8fafc';
-      const hc1 = ag.header_color || '#0ea5e9';
-      const hc2 = ag.header_color_2 || hc1;
-      const headerBg = hc1 === hc2 ? hc1 : 'linear-gradient(135deg, ' + hc1 + ', ' + hc2 + ')';
-
-      let html = '';
-
-      // Header
-      html += '<header class="py-8 px-6 text-white" style="background: ' + headerBg + ';">';
-      html += '<div class="max-w-2xl mx-auto flex items-center space-x-4">';
-      if (ag.logo_url) {
-        html += '<img src="' + esc(ag.logo_url) + '" alt="Logo" class="w-14 h-14 rounded-xl object-cover bg-white/20 shadow-lg" />';
-      }
-      html += '<div>';
-      html += '<h1 class="text-2xl font-bold">' + esc(ag.agency_name) + '</h1>';
-      if (ag.description) html += '<p class="text-sm opacity-90 mt-1">' + esc(ag.description) + '</p>';
-      html += '</div></div></header>';
-
-      // Banner
-      if (ag.banner_url) {
-        html += '<div class="max-w-2xl mx-auto mt-6 px-4"><img src="' + esc(ag.banner_url) + '" alt="Banner" class="w-full rounded-xl object-cover shadow-sm" style="max-height:220px;" /></div>';
-      }
-
-      // Form
-      html += '<div class="max-w-2xl mx-auto px-4 py-8"><form id="quoteForm" class="space-y-6">';
-
-      // Client info
-      html += '<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 fade-in">';
-      html += '<h2 class="text-lg font-bold text-slate-800 mb-4">Your Information</h2>';
-      html += '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">';
-      html += inputField('client_first_name', 'First Name', 'text', true);
-      html += inputField('client_last_name', 'Last Name', 'text', true);
-      html += inputField('client_phone', 'Phone', 'tel', true);
-      html += inputField('client_email', 'Email', 'email', true);
-      html += '</div>';
-      html += '<div class="mt-4">' + inputField('client_address', 'Address', 'text', true) + '</div>';
-      html += '</div>';
-
-      // Dynamic sections
-      for (const sec of sections) {
-        html += '<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 fade-in">';
-        html += '<h2 class="text-lg font-bold text-slate-800 mb-1">' + esc(sec.section_name) + '</h2>';
-        if (sec.section_description) html += '<p class="text-sm text-slate-500 mb-4">' + esc(sec.section_description) + '</p>';
-        html += '<div class="space-y-5">';
+    // --- Confirm ---
+    function renderConfirm() {
+      let h = `<h2 class="text-xl font-bold text-slate-800 mb-2">Review Your Information</h2>`;
+      h += `<p class="text-sm text-slate-500 mb-6">Please review your answers before submitting.</p>`;
+      for (const sec of activeSections) {
+        const secAns = answers[sec.id] || {};
+        h += `<div class="bg-white rounded-xl border border-slate-200 p-5 mb-4">`;
+        h += `<h3 class="text-sm font-bold text-slate-600 uppercase tracking-wide mb-3">${esc(sec.title)}</h3>`;
+        h += `<dl class="space-y-2">`;
         for (const q of (sec.questions || [])) {
-          html += renderQuestion(q);
+          let val = secAns[q.id];
+          if (val === undefined || val === null || val === '') continue;
+          if (Array.isArray(val)) {
+            // Resolve labels for multiselect
+            val = val.map(v => {
+              const opt = (q.options || []).find(o => (typeof o === 'object' ? o.value : o) === v);
+              return opt ? (typeof opt === 'object' ? opt.label : opt) : v;
+            }).join(', ');
+          }
+          h += `<div class="flex justify-between gap-4"><dt class="text-sm text-slate-500">${esc(q.label)}</dt><dd class="text-sm font-medium text-slate-800 text-right">${esc(String(val))}</dd></div>`;
         }
-        html += '</div></div>';
+        h += `</dl></div>`;
       }
+      h += `<div class="flex justify-between mt-8">`;
+      h += backBtn();
+      h += brandBtn('Submit', 'id="submitBtn" onclick="submitForm()"');
+      h += `</div>`;
+      shell(h, true);
+    }
 
-      // Notes
-      html += '<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 fade-in">';
-      html += '<label class="block text-sm font-semibold text-slate-700 mb-2">Additional Notes (optional)</label>';
-      html += '<textarea id="field_notes" rows="3" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 resize-none" placeholder="Anything else we should know?"></textarea>';
-      html += '</div>';
+    // --- Thank You ---
+    function renderThankYou() {
+      const msg = cfg.thankYouMessage || 'Thank you for submitting your quote request. One of our agents will reach out to you soon.';
+      let h = `<div class="text-center py-12 fade-in">`;
+      h += `<div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5"><svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>`;
+      h += `<h1 class="text-2xl font-bold text-slate-800 mb-3">Thank You!</h1>`;
+      h += `<p class="text-slate-600 max-w-sm mx-auto">${esc(msg)}</p>`;
+      h += `</div>`;
+      shell(h, false);
+    }
 
-      // T&C
-      html += '<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 fade-in">';
-      html += '<label class="flex items-start space-x-3 cursor-pointer">';
-      html += '<input type="checkbox" id="terms_cb" class="mt-1 w-4 h-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500" />';
-      html += '<span class="text-sm text-slate-600">I understand that <strong>' + esc(ag.agency_name) + '</strong> and CJX are not responsible for any sensitive information I submit. I will not submit Social Security numbers, EINs, driver\'s license numbers, or government IDs. I accept full liability for any sensitive data I provide.</span>';
-      html += '</label></div>';
+    // --- Navigation ---
+    function nextStep() {
+      currentStep++;
+      computeActiveSections();
+      // Skip sections that are no longer active
+      while (currentStep >= 1 && currentStep <= activeSections.length) {
+        const sec = activeSections[currentStep - 1];
+        if (!sec) break;
+        // This section is active, render it
+        break;
+      }
+      // If currentStep exceeds active sections, go to confirm
+      if (currentStep > activeSections.length + 1) currentStep = activeSections.length + 1;
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-      // Submit
-      html += '<div class="flex justify-center">';
-      html += '<button type="submit" id="submitBtn" disabled class="px-8 py-3 text-white font-semibold rounded-xl shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-md" style="background: ' + headerBg + ';">Submit Quote Request</button>';
-      html += '</div>';
+    window.goBack = function() {
+      if (currentStep <= 0) return;
+      currentStep--;
+      computeActiveSections();
+      // Skip inactive sections going backward
+      while (currentStep >= 1 && currentStep <= activeSections.length) {
+        const sec = activeSections[currentStep - 1];
+        if (sec) break;
+        currentStep--;
+      }
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
-      // Sensitive warning
-      html += '<div id="sensitiveWarn" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800"></div>';
-
-      html += '</form></div>';
-
-      // Footer
-      html += '<div style="text-align:center;padding:20px 0 12px;">';
-      html += '<div style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#0f172a;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,0.15);">';
-      html += '<span style="font-size:11px;color:#94a3b8;font-weight:500;">Powered by</span>';
-      html += '<span style="letter-spacing:-0.04em;font-weight:900;font-size:13px;">';
-      html += '<span style="color:#ffffff;">C</span>';
-      html += '<span style="color:#38bdf8;font-weight:800;">j</span>';
-      html += '<span style="color:#0ea5e9;">X</span>';
-      html += '</span>';
-      html += '</div>';
-      html += '</div>';
-
-      app.innerHTML = '';
-      app.style.background = bgColor;
-      document.body.style.background = bgColor;
-      app.innerHTML = html;
-
-      // Wire up T&C checkbox
-      const tcBox = document.getElementById('terms_cb');
-      const submitBtn = document.getElementById('submitBtn');
-      tcBox.addEventListener('change', function() { submitBtn.disabled = !tcBox.checked; });
-
-      // Wire up yes/no conditionals
-      document.querySelectorAll('[data-yn-qid]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          const qid = btn.dataset.ynQid;
-          const val = btn.dataset.ynVal;
-          // Toggle active state
-          document.querySelectorAll('[data-yn-qid="' + qid + '"]').forEach(function(b) {
-            b.classList.remove('ring-2', 'ring-sky-500', 'bg-sky-50', 'border-sky-500');
-            b.classList.add('border-slate-300');
-          });
-          btn.classList.add('ring-2', 'ring-sky-500', 'bg-sky-50', 'border-sky-500');
-          btn.classList.remove('border-slate-300');
-          document.getElementById('yn_val_' + qid).value = val;
-          // Show/hide conditional fields
-          document.querySelectorAll('[data-cond-parent="' + qid + '"]').forEach(function(el) {
-            el.style.display = el.dataset.condTrigger === val ? 'block' : 'none';
-          });
+    // --- Submit ---
+    async function submitForm() {
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+      btn.textContent = 'Submitting...';
+      try {
+        const res = await fetch(`${API_BASE}/${encodeURIComponent(slug)}/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            answers: answers,
+            agencyId: cfg.agencyId,
+            source: cfg.source
+          })
         });
-      });
-
-      // Submit handler
-      document.getElementById('quoteForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const firstName = document.getElementById('field_client_first_name').value.trim();
-        const lastName = document.getElementById('field_client_last_name').value.trim();
-        const phone = document.getElementById('field_client_phone').value.trim();
-        const email = document.getElementById('field_client_email').value.trim();
-        const address = document.getElementById('field_client_address').value.trim();
-        const notes = document.getElementById('field_notes').value.trim();
-
-        if (!firstName || !lastName || !phone || !email) {
-          alert('Please fill in all required fields (First Name, Last Name, Phone, Email).');
-          return;
+        const result = await res.json();
+        if (result.success) {
+          currentStep = activeSections.length + 2;
+          render();
+        } else {
+          alert(result.error || 'Something went wrong. Please try again.');
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          btn.textContent = 'Submit';
         }
-
-        // Collect answers
-        const answers = {};
-        let hasSensitive = false;
-        document.querySelectorAll('[data-answer-qid]').forEach(function(el) {
-          const label = el.dataset.answerLabel || ('q_' + el.dataset.answerQid);
-          let val = '';
-          if (el.type === 'checkbox') {
-            // collect all checked values for checkbox_list
-            if (el.checked) {
-              if (!answers[label]) answers[label] = [];
-              answers[label].push(el.value);
-            }
-            return;
-          }
-          val = el.value;
-          if (SENSITIVE_RE.test(label) || SENSITIVE_RE.test(val)) hasSensitive = true;
-          if (val) answers[label] = val;
-        });
-
-        if (hasSensitive) {
-          const warn = document.getElementById('sensitiveWarn');
-          warn.classList.remove('hidden');
-          warn.textContent = 'Warning: Please do not submit sensitive information such as SSNs, EINs, or government IDs. Those fields have been flagged.';
-          return;
-        }
-
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Submitting...';
-
-        try {
-          const res = await fetch(API + '/' + encodeURIComponent(slug) + '/submit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              client_name: firstName + ' ' + lastName,
-              client_phone: phone,
-              client_email: email,
-              client_address: address,
-              answers: answers,
-              notes: notes || null
-            })
-          });
-          const result = await res.json();
-          if (result.success) {
-            showSuccess(ag.agency_name);
-          } else {
-            alert(result.error || 'Something went wrong. Please try again.');
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit Quote Request';
-          }
-        } catch (err) {
-          alert('Network error. Please check your connection and try again.');
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Submit Quote Request';
-        }
-      });
+      } catch (e) {
+        alert('Network error. Please check your connection and try again.');
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.textContent = 'Submit';
+      }
     }
 
-    function inputField(name, label, type, required) {
-      const req = required ? ' <span class="text-rose-500">*</span>' : '';
-      return '<div><label class="block text-sm font-semibold text-slate-700 mb-1">' + label + req + '</label>'
-        + '<input type="' + type + '" id="field_' + name + '"' + (required ? ' required' : '') + ' class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500" /></div>';
-    }
-
-    function renderQuestion(q) {
-      let html = '<div>';
-      const label = esc(q.question_label);
-      const reqMark = q.is_required ? ' <span class="text-rose-500">*</span>' : '';
-      const qid = q.id;
-
-      if (q.question_type === 'short_text') {
-        html += '<label class="block text-sm font-semibold text-slate-700 mb-1">' + label + reqMark + '</label>';
-        html += '<input type="text" data-answer-qid="' + qid + '" data-answer-label="' + esc(q.question_label) + '"' + (q.is_required ? ' required' : '') + ' class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500" />';
-      }
-
-      else if (q.question_type === 'yes_no') {
-        html += '<label class="block text-sm font-semibold text-slate-700 mb-2">' + label + reqMark + '</label>';
-        html += '<input type="hidden" id="yn_val_' + qid + '" data-answer-qid="' + qid + '" data-answer-label="' + esc(q.question_label) + '" value="" />';
-        html += '<div class="flex space-x-3">';
-        html += '<button type="button" data-yn-qid="' + qid + '" data-yn-val="yes" class="flex-1 py-2 rounded-lg border border-slate-300 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all">Yes</button>';
-        html += '<button type="button" data-yn-qid="' + qid + '" data-yn-val="no" class="flex-1 py-2 rounded-lg border border-slate-300 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all">No</button>';
-        html += '</div>';
-        // Conditionals
-        if (q.conditionals && q.conditionals.length) {
-          for (const c of q.conditionals) {
-            html += '<div data-cond-parent="' + qid + '" data-cond-trigger="' + esc(c.trigger_value) + '" style="display:none;" class="mt-3 pl-4 border-l-2 border-sky-200">';
-            html += '<label class="block text-sm font-semibold text-slate-700 mb-1">' + esc(c.follow_up_label) + '</label>';
-            if (c.follow_up_type === 'dropdown') {
-              html += '<select data-answer-qid="' + qid + '_cond_' + c.id + '" data-answer-label="' + esc(c.follow_up_label) + '" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"><option value="">Select...</option>';
-              var opts = [];
-              try { opts = JSON.parse(c.follow_up_options_json || '[]'); } catch(e) {}
-              for (var o of opts) html += '<option value="' + esc(o) + '">' + esc(o) + '</option>';
-              html += '</select>';
-            } else {
-              html += '<input type="text" data-answer-qid="' + qid + '_cond_' + c.id + '" data-answer-label="' + esc(c.follow_up_label) + '" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500" />';
-            }
-            html += '</div>';
-          }
-        }
-      }
-
-      else if (q.question_type === 'checkbox_list') {
-        html += '<label class="block text-sm font-semibold text-slate-700 mb-2">' + label + reqMark + '</label>';
-        let opts = [];
-        try { opts = JSON.parse(q.options_json || '[]'); } catch(e) {}
-        html += '<div class="space-y-2">';
-        for (let i = 0; i < opts.length; i++) {
-          html += '<label class="flex items-center space-x-2 cursor-pointer"><input type="checkbox" data-answer-qid="' + qid + '" data-answer-label="' + esc(q.question_label) + '" value="' + esc(opts[i]) + '" class="w-4 h-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500" /><span class="text-sm text-slate-700">' + esc(opts[i]) + '</span></label>';
-        }
-        html += '</div>';
-      }
-
-      else if (q.question_type === 'dropdown') {
-        html += '<label class="block text-sm font-semibold text-slate-700 mb-1">' + label + reqMark + '</label>';
-        html += '<select data-answer-qid="' + qid + '" data-answer-label="' + esc(q.question_label) + '"' + (q.is_required ? ' required' : '') + ' class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"><option value="">Select...</option>';
-        let opts = [];
-        try { opts = JSON.parse(q.options_json || '[]'); } catch(e) {}
-        for (const o of opts) html += '<option value="' + esc(o) + '">' + esc(o) + '</option>';
-        html += '</select>';
-      }
-
-      html += '</div>';
-      return html;
-    }
+    // Expose for inline onclick
+    window.nextStep = nextStep;
+    window.validateAndNext = validateAndNext;
+    window.submitForm = submitForm;
 
     init();
   </script>
