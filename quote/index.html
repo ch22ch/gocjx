@@ -7,6 +7,7 @@
   <title>Online Quoting</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Outfit', sans-serif; background: #f8fafc; }
     .spinner { border: 3px solid #e2e8f0; border-top-color: #0ea5e9; border-radius: 50%; width: 40px; height: 40px; animation: spin 0.8s linear infinite; }
@@ -15,6 +16,13 @@
     @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
     .progress-bar { transition: width 0.4s ease; }
     .ms-toggle.active { box-shadow: 0 0 0 2px var(--brand); background: color-mix(in srgb, var(--brand) 8%, white); }
+    .dark-mode body, .dark-mode { background: #0f172a; color: #e2e8f0; }
+    .dark-mode .dm-card { background: #1e293b; border-color: #334155; }
+    .dark-mode .dm-text { color: #e2e8f0; }
+    .dark-mode .dm-muted { color: #94a3b8; }
+    .dark-mode .dm-input { background: #1e293b; border-color: #475569; color: #e2e8f0; }
+    .dark-mode .dm-bg { background: #0f172a; }
+    .preview-banner { background: #f59e0b; color: #78350f; text-align: center; padding: 6px 12px; font-size: 13px; font-weight: 600; }
   </style>
 </head>
 <body class="min-h-screen">
@@ -29,6 +37,8 @@
     let currentStep = 0;  // 0=welcome, 1..N=sections, N+1=confirm, N+2=thanks
     let answers = {};     // { sectionId: { questionId: value } }
     let activeSections = [];
+    let branding = {};    // Branding config from API
+    const isPreview = new URLSearchParams(window.location.search).get('preview') === 'true';
 
     // --- Helpers ---
     function getSlug() {
@@ -36,6 +46,53 @@
       return parts[parts.length - 1] === 'quote' ? '' : parts[parts.length - 1];
     }
     function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+    // --- Branding helpers ---
+    function applyBranding(b) {
+      branding = b || {};
+      // Dark mode
+      const dm = branding.darkMode || 'auto';
+      if (dm === 'dark' || (dm === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark-mode');
+      } else {
+        document.documentElement.classList.remove('dark-mode');
+      }
+      // Fonts
+      const bodyFont = branding.bodyFont || 'Inter';
+      const headerFont = branding.headerFont || 'Inter';
+      const fontsToLoad = new Set();
+      if (bodyFont !== 'Inter' && bodyFont !== 'Outfit') fontsToLoad.add(bodyFont);
+      if (headerFont !== 'Inter' && headerFont !== 'Outfit') fontsToLoad.add(headerFont);
+      if (fontsToLoad.size > 0) {
+        const families = Array.from(fontsToLoad).map(f => 'family=' + encodeURIComponent(f) + ':wght@400;500;600;700').join('&');
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://fonts.googleapis.com/css2?' + families + '&display=swap';
+        document.head.appendChild(link);
+      }
+      document.body.style.fontFamily = "'" + bodyFont + "', 'Outfit', sans-serif";
+      // Accent
+      document.documentElement.style.setProperty('--brand', branding.accentColor || cfg.buttonColor || cfg.primaryColor || '#0ea5e9');
+    }
+
+    function contactBlock(location) {
+      if (!branding.showContactIn || !Array.isArray(branding.showContactIn) || !branding.showContactIn.includes(location)) return '';
+      let parts = [];
+      if (branding.officePhone) parts.push('<span>' + esc(branding.officePhone) + '</span>');
+      if (branding.officeEmail) parts.push('<span>' + esc(branding.officeEmail) + '</span>');
+      if (branding.officeAddress) parts.push('<span>' + esc(branding.officeAddress) + '</span>');
+      if (branding.siteUrl) parts.push('<a href="' + esc(branding.siteUrl) + '" target="_blank" rel="noopener" style="text-decoration:underline;">' + esc(branding.siteLinkLabel || 'Visit Our Website') + '</a>');
+      if (parts.length === 0) return '';
+      return '<div class="text-xs dm-muted" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:8px 0;opacity:0.8;">' + parts.join('<span style="opacity:0.3;">|</span>') + '</div>';
+    }
+
+    function logoHtml(size) {
+      const url = branding.logoUrl;
+      if (!url) return '';
+      const sizes = { small: 'w-8 h-8', medium: 'w-10 h-10', large: 'w-14 h-14' };
+      const cls = sizes[branding.logoSize || 'medium'] || sizes.medium;
+      return '<img src="' + esc(url) + '" alt="Logo" class="' + cls + ' rounded-lg object-cover bg-white/20 shadow" />';
+    }
 
     // --- Init ---
     async function init() {
@@ -52,7 +109,8 @@
         return;
       }
       document.title = (cfg.agencyName || 'Agency') + ' - Get a Quote';
-      document.documentElement.style.setProperty('--brand', cfg.buttonColor || cfg.primaryColor || '#0ea5e9');
+      // Apply branding from API
+      applyBranding(cfg.branding || {});
       computeActiveSections();
       render();
     }
@@ -91,47 +149,83 @@
     }
 
     function shell(inner, showProgress) {
-      const pc = cfg.primaryColor || '#0ea5e9';
-      const ac = cfg.accentColor || pc;
-      const grad = pc === ac ? pc : `linear-gradient(135deg, ${pc}, ${ac})`;
+      const ac = branding.accentColor || cfg.buttonColor || cfg.primaryColor || '#0ea5e9';
+      const hdrBg = branding.headerBgColor || cfg.primaryColor || '#0ea5e9';
+      const hdrText = branding.headerTextColor || '#ffffff';
+      const headerFont = branding.headerFont || 'Inter';
+      const placement = branding.logoPlacement || 'left';
+      const justify = placement === 'center' ? 'justify-center' : placement === 'right' ? 'justify-end' : 'justify-start';
       let h = '';
+      // Preview banner
+      if (isPreview) {
+        h += '<div class="preview-banner">Preview Mode -- Submissions Disabled</div>';
+      }
       // Header
-      h += `<div class="py-5 px-6 text-white" style="background:${grad};">`;
-      h += `<div class="max-w-lg mx-auto flex items-center gap-3">`;
-      if (cfg.logoUrl) h += `<img src="${esc(cfg.logoUrl)}" alt="Logo" class="w-10 h-10 rounded-lg object-cover bg-white/20 shadow" />`;
-      h += `<span class="text-lg font-bold">${esc(cfg.agencyName)}</span>`;
-      h += `</div></div>`;
+      h += `<div class="py-5 px-6" style="background:${esc(hdrBg)};color:${esc(hdrText)};">`;
+      h += `<div class="max-w-lg mx-auto flex items-center gap-3 ${justify}">`;
+      h += logoHtml();
+      h += `<span class="text-lg font-bold" style="font-family:'${esc(headerFont)}',sans-serif;">${esc(cfg.agencyName)}</span>`;
+      h += `</div>`;
+      h += contactBlock('header');
+      h += `</div>`;
+      // Banner below header
+      if (branding.bannerBelowHeader) {
+        h += `<div class="max-w-lg mx-auto"><img src="${esc(branding.bannerBelowHeader)}" alt="" class="w-full rounded-b-lg" style="max-height:200px;object-fit:cover;" /></div>`;
+      }
       // Progress
       if (showProgress) {
-        h += `<div class="max-w-lg mx-auto px-6 mt-4"><div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden"><div class="progress-bar h-2 rounded-full" style="width:${progressPct()}%;background:${cfg.buttonColor || pc};"></div></div><p class="text-xs text-slate-400 mt-1 text-right">${progressPct()}% complete</p></div>`;
+        h += `<div class="max-w-lg mx-auto px-6 mt-4"><div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden"><div class="progress-bar h-2 rounded-full" style="width:${progressPct()}%;background:${esc(ac)};"></div></div><p class="text-xs text-slate-400 mt-1 text-right">${progressPct()}% complete</p></div>`;
       }
       // Body
       h += `<div class="max-w-lg mx-auto px-6 py-8 fade-in">${inner}</div>`;
+      // Banner above footer
+      if (branding.bannerAboveFooter) {
+        h += `<div class="max-w-lg mx-auto"><img src="${esc(branding.bannerAboveFooter)}" alt="" class="w-full rounded-t-lg" style="max-height:200px;object-fit:cover;" /></div>`;
+      }
+      // Contact in footer
+      h += contactBlock('footer');
       // Footer
       h += poweredFooter();
       app.innerHTML = h;
     }
 
     function poweredFooter() {
+      if (branding.footerText) {
+        return `<div style="text-align:center;padding:20px 0 12px;"><p class="text-xs dm-muted" style="opacity:0.7;">${esc(branding.footerText)}</p></div>`;
+      }
       return `<div style="text-align:center;padding:20px 0 12px;"><div style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#0f172a;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,0.15);"><span style="font-size:11px;color:#94a3b8;font-weight:500;">Powered by</span><span style="letter-spacing:-0.04em;font-weight:900;font-size:13px;"><span style="color:#ffffff;">C</span><span style="color:#38bdf8;font-weight:800;">j</span><span style="color:#0ea5e9;">X</span></span></div></div>`;
     }
 
     function brandBtn(text, extra) {
-      const bc = cfg.buttonColor || cfg.primaryColor || '#0ea5e9';
-      return `<button type="button" ${extra || ''} class="px-8 py-3 text-white font-semibold rounded-xl shadow-sm hover:shadow-md transition-all text-sm" style="background:${bc};">${esc(text)}</button>`;
+      const bc = branding.accentColor || cfg.buttonColor || cfg.primaryColor || '#0ea5e9';
+      const disabled = isPreview && (extra || '').includes('submitBtn');
+      const opacity = disabled ? 'opacity:0.5;cursor:not-allowed;' : '';
+      const disAttr = disabled ? 'disabled' : '';
+      return `<button type="button" ${disAttr} ${extra || ''} class="px-8 py-3 text-white font-semibold rounded-xl shadow-sm hover:shadow-md transition-all text-sm" style="background:${bc};${opacity}">${esc(text)}</button>`;
     }
 
     function backBtn() {
-      return `<button type="button" onclick="goBack()" class="px-6 py-3 text-slate-600 font-semibold rounded-xl border border-slate-300 hover:bg-slate-50 transition-all text-sm">Back</button>`;
+      return `<button type="button" onclick="goBack()" class="px-6 py-3 text-slate-600 font-semibold rounded-xl border border-slate-300 hover:bg-slate-50 transition-all text-sm dm-text">Back</button>`;
     }
 
     // --- Welcome ---
     function renderWelcome() {
+      const headline = branding.welcomeHeadline || "Let's get the process started.";
+      const subtext = branding.welcomeSubtext || "We'll ask you a few quick questions to prepare your personalized quote.";
+      const ctaLabel = branding.ctaButtonLabel || 'Get My Quote';
+      const headerFont = branding.headerFont || 'Inter';
       let h = `<div class="text-center py-12">`;
-      if (cfg.logoUrl) h += `<img src="${esc(cfg.logoUrl)}" alt="Logo" class="w-20 h-20 rounded-2xl object-cover mx-auto mb-6 shadow-lg" />`;
-      h += `<h1 class="text-2xl font-bold text-slate-800 mb-2">${esc(cfg.agencyName)}</h1>`;
-      h += `<p class="text-slate-500 mb-8">Let's get the process started.</p>`;
-      h += `<div>${brandBtn('Get My Quote', 'onclick="nextStep()"')}</div>`;
+      if (branding.logoUrl) {
+        h += `<img src="${esc(branding.logoUrl)}" alt="Logo" class="w-20 h-20 rounded-2xl object-cover mx-auto mb-6 shadow-lg" />`;
+      } else if (cfg.logoUrl) {
+        h += `<img src="${esc(cfg.logoUrl)}" alt="Logo" class="w-20 h-20 rounded-2xl object-cover mx-auto mb-6 shadow-lg" />`;
+      }
+      h += `<h1 class="text-2xl font-bold dm-text mb-2" style="font-family:'${esc(headerFont)}',sans-serif;">${esc(cfg.agencyName)}</h1>`;
+      h += `<p class="dm-muted text-slate-500 mb-2" style="font-size:15px;font-weight:500;">${esc(headline)}</p>`;
+      if (subtext) h += `<p class="dm-muted text-slate-400 mb-8 text-sm max-w-sm mx-auto">${esc(subtext)}</p>`;
+      else h += `<div class="mb-8"></div>`;
+      h += contactBlock('welcome');
+      h += `<div>${brandBtn(ctaLabel, 'onclick="nextStep()"')}</div>`;
       h += `</div>`;
       shell(h, false);
     }
@@ -139,7 +233,8 @@
     // --- Section form ---
     function renderSection(section) {
       if (!answers[section.id]) answers[section.id] = {};
-      let h = `<h2 class="text-xl font-bold text-slate-800 mb-6">${esc(section.title)}</h2>`;
+      const headerFont = branding.headerFont || 'Inter';
+      let h = `<h2 class="text-xl font-bold dm-text text-slate-800 mb-6" style="font-family:'${esc(headerFont)}',sans-serif;">${esc(section.title)}</h2>`;
       h += `<div class="space-y-5">`;
       for (const q of (section.questions || [])) {
         h += renderQuestion(section.id, q);
@@ -157,26 +252,27 @@
     function renderQuestion(secId, q) {
       const val = answers[secId]?.[q.id];
       const req = q.required ? ' <span class="text-rose-500">*</span>' : '';
+      const ac = branding.accentColor || cfg.buttonColor || '#0ea5e9';
       let h = `<div data-qid="${q.id}">`;
-      h += `<label class="block text-sm font-semibold text-slate-700 mb-1.5">${esc(q.label)}${req}</label>`;
+      h += `<label class="block text-sm font-semibold dm-text text-slate-700 mb-1.5">${esc(q.label)}${req}</label>`;
 
       if (q.type === 'text') {
-        h += `<input type="text" data-field="${q.id}" value="${esc(val || '')}" placeholder="${esc(q.placeholder || '')}" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:border-transparent" style="--tw-ring-color:${cfg.buttonColor || '#0ea5e9'}" />`;
+        h += `<input type="text" data-field="${q.id}" value="${esc(val || '')}" placeholder="${esc(q.placeholder || '')}" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:border-transparent dm-input" style="--tw-ring-color:${ac}" />`;
       }
       else if (q.type === 'number') {
-        h += `<input type="number" data-field="${q.id}" value="${esc(val || '')}" placeholder="${esc(q.placeholder || '')}" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:border-transparent" style="--tw-ring-color:${cfg.buttonColor || '#0ea5e9'}" />`;
+        h += `<input type="number" data-field="${q.id}" value="${esc(val || '')}" placeholder="${esc(q.placeholder || '')}" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:border-transparent dm-input" style="--tw-ring-color:${ac}" />`;
       }
       else if (q.type === 'date') {
-        h += `<input type="date" data-field="${q.id}" value="${esc(val || '')}" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:border-transparent" style="--tw-ring-color:${cfg.buttonColor || '#0ea5e9'}" />`;
+        h += `<input type="date" data-field="${q.id}" value="${esc(val || '')}" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:border-transparent dm-input" style="--tw-ring-color:${ac}" />`;
       }
       else if (q.type === 'yesno') {
         const yActive = val === 'yes' ? 'active' : '';
         const nActive = val === 'no' ? 'active' : '';
-        h += `<div class="flex gap-3"><button type="button" data-yn="${q.id}" data-val="yes" class="ms-toggle ${yActive} flex-1 py-2.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all" style="--brand:${cfg.buttonColor || '#0ea5e9'}">Yes</button>`;
-        h += `<button type="button" data-yn="${q.id}" data-val="no" class="ms-toggle ${nActive} flex-1 py-2.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all" style="--brand:${cfg.buttonColor || '#0ea5e9'}">No</button></div>`;
+        h += `<div class="flex gap-3"><button type="button" data-yn="${q.id}" data-val="yes" class="ms-toggle ${yActive} flex-1 py-2.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all dm-text" style="--brand:${ac}">Yes</button>`;
+        h += `<button type="button" data-yn="${q.id}" data-val="no" class="ms-toggle ${nActive} flex-1 py-2.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all dm-text" style="--brand:${ac}">No</button></div>`;
       }
       else if (q.type === 'select') {
-        h += `<select data-field="${q.id}" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:border-transparent" style="--tw-ring-color:${cfg.buttonColor || '#0ea5e9'}"><option value="">Select...</option>`;
+        h += `<select data-field="${q.id}" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:border-transparent dm-input" style="--tw-ring-color:${ac}"><option value="">Select...</option>`;
         for (const o of (q.options || [])) {
           const sel = val === o ? ' selected' : '';
           h += `<option value="${esc(o)}"${sel}>${esc(o)}</option>`;
@@ -190,7 +286,7 @@
           const optVal = typeof o === 'object' ? o.value : o;
           const optLabel = typeof o === 'object' ? o.label : o;
           const isActive = selected.includes(optVal) ? 'active' : '';
-          h += `<button type="button" data-ms="${q.id}" data-val="${esc(optVal)}" class="ms-toggle ${isActive} px-4 py-2.5 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all text-left" style="--brand:${cfg.buttonColor || '#0ea5e9'}">${esc(optLabel)}</button>`;
+          h += `<button type="button" data-ms="${q.id}" data-val="${esc(optVal)}" class="ms-toggle ${isActive} px-4 py-2.5 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all text-left dm-text" style="--brand:${ac}">${esc(optLabel)}</button>`;
         }
         h += `</div>`;
       }
@@ -276,12 +372,12 @@
 
     // --- Confirm ---
     function renderConfirm() {
-      let h = `<h2 class="text-xl font-bold text-slate-800 mb-2">Review Your Information</h2>`;
-      h += `<p class="text-sm text-slate-500 mb-6">Please review your answers before submitting.</p>`;
+      let h = `<h2 class="text-xl font-bold dm-text text-slate-800 mb-2">Review Your Information</h2>`;
+      h += `<p class="text-sm dm-muted text-slate-500 mb-6">Please review your answers before submitting.</p>`;
       for (const sec of activeSections) {
         const secAns = answers[sec.id] || {};
-        h += `<div class="bg-white rounded-xl border border-slate-200 p-5 mb-4">`;
-        h += `<h3 class="text-sm font-bold text-slate-600 uppercase tracking-wide mb-3">${esc(sec.title)}</h3>`;
+        h += `<div class="bg-white dm-card rounded-xl border border-slate-200 p-5 mb-4">`;
+        h += `<h3 class="text-sm font-bold dm-muted text-slate-600 uppercase tracking-wide mb-3">${esc(sec.title)}</h3>`;
         h += `<dl class="space-y-2">`;
         for (const q of (sec.questions || [])) {
           let val = secAns[q.id];
@@ -293,7 +389,7 @@
               return opt ? (typeof opt === 'object' ? opt.label : opt) : v;
             }).join(', ');
           }
-          h += `<div class="flex justify-between gap-4"><dt class="text-sm text-slate-500">${esc(q.label)}</dt><dd class="text-sm font-medium text-slate-800 text-right">${esc(String(val))}</dd></div>`;
+          h += `<div class="flex justify-between gap-4"><dt class="text-sm dm-muted text-slate-500">${esc(q.label)}</dt><dd class="text-sm font-medium dm-text text-slate-800 text-right">${esc(String(val))}</dd></div>`;
         }
         h += `</dl></div>`;
       }
@@ -306,11 +402,14 @@
 
     // --- Thank You ---
     function renderThankYou() {
-      const msg = cfg.thankYouMessage || 'Thank you for submitting your quote request. One of our agents will reach out to you soon.';
+      const tyHeadline = branding.thankYouHeadline || "You're all set!";
+      const tyMessage = branding.thankYouMessage || cfg.thankYouMessage || 'Thank you for submitting your quote request. One of our agents will reach out to you soon.';
+      const headerFont = branding.headerFont || 'Inter';
       let h = `<div class="text-center py-12 fade-in">`;
       h += `<div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5"><svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>`;
-      h += `<h1 class="text-2xl font-bold text-slate-800 mb-3">Thank You!</h1>`;
-      h += `<p class="text-slate-600 max-w-sm mx-auto">${esc(msg)}</p>`;
+      h += `<h1 class="text-2xl font-bold dm-text text-slate-800 mb-3" style="font-family:'${esc(headerFont)}',sans-serif;">${esc(tyHeadline)}</h1>`;
+      h += `<p class="dm-muted text-slate-600 max-w-sm mx-auto">${esc(tyMessage)}</p>`;
+      h += contactBlock('thankyou');
       h += `</div>`;
       shell(h, false);
     }
@@ -348,6 +447,7 @@
 
     // --- Submit ---
     async function submitForm() {
+      if (isPreview) return; // Preview mode: do nothing
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
       btn.style.opacity = '0.5';
