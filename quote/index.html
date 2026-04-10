@@ -113,6 +113,15 @@
         branding = e.data.branding;
         applyBrandingLive(e.data.branding);
       }
+      // Page navigation from WebBuilder preview controls
+      if (e.data && e.data.type === 'CJX_NAV') {
+        const maxStep = activeSections.length + 2; // welcome(0) + sections(1..N) + confirm(N+1) + thanks(N+2)
+        if (e.data.action === 'next') {
+          if (currentStep < maxStep) { currentStep++; render(); }
+        } else if (e.data.action === 'prev') {
+          if (currentStep > 0) { currentStep--; render(); }
+        }
+      }
     });
 
     function applyBranding(b) {
