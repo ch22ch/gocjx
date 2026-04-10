@@ -48,8 +48,76 @@
     function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 
     // --- Branding helpers ---
+    // Global reference for postMessage live preview
+    window.cjxBranding = {};
+
+    function updateCropStyles(b) {
+      let styleEl = document.getElementById('cjx-crop-styles');
+      if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = 'cjx-crop-styles'; document.head.appendChild(styleEl); }
+      const bhd = b.bannerBelowHeaderCropDesktop || 'center';
+      const bhm = b.bannerBelowHeaderCropMobile || 'center';
+      const bfd = b.bannerAboveFooterCropDesktop || 'center';
+      const bfm = b.bannerAboveFooterCropMobile || 'center';
+      styleEl.textContent = '.banner-below-header img{object-position:' + bhd + '!important;}.banner-above-footer img{object-position:' + bfd + '!important;}@media(max-width:768px){.banner-below-header img{object-position:' + bhm + '!important;}.banner-above-footer img{object-position:' + bfm + '!important;}}';
+    }
+
+    function applyBrandingLive(b) {
+      // Header
+      const header = document.querySelector('.quote-header');
+      if (header) { header.style.background = b.headerBgColor || '#0f172a'; header.style.color = b.headerTextColor || '#fff'; }
+      // Logo
+      const logo = document.querySelector('.quote-logo');
+      if (logo && b.logoUrl) { logo.src = b.logoUrl; logo.style.display = ''; }
+      else if (logo) { logo.style.display = 'none'; }
+      // Accent color on buttons
+      document.querySelectorAll('.brand-btn').forEach(function(btn) { btn.style.backgroundColor = b.accentColor || '#0ea5e9'; });
+      // Welcome text
+      var wh = document.querySelector('.welcome-headline'); if (wh) wh.textContent = b.welcomeHeadline || "Let's get the process started.";
+      var ws = document.querySelector('.welcome-subtext'); if (ws) ws.textContent = b.welcomeSubtext || "We'll ask you a few quick questions to prepare your personalized quote.";
+      var cta = document.querySelector('[data-welcome-cta]'); if (cta) cta.textContent = b.ctaButtonLabel || 'Get My Quote';
+      // Banners
+      var bannerTop = document.querySelector('.banner-below-header');
+      if (bannerTop) { bannerTop.style.display = b.bannerBelowHeader ? '' : 'none'; var img = bannerTop.querySelector('img'); if (img && b.bannerBelowHeader) img.src = b.bannerBelowHeader; }
+      var bannerBot = document.querySelector('.banner-above-footer');
+      if (bannerBot) { bannerBot.style.display = b.bannerAboveFooter ? '' : 'none'; var img2 = bannerBot.querySelector('img'); if (img2 && b.bannerAboveFooter) img2.src = b.bannerAboveFooter; }
+      // Crop styles
+      updateCropStyles(b);
+      // Footer text
+      var ft = document.querySelector('.quote-footer-text'); if (ft) ft.textContent = b.footerText || '';
+      // Progress bar color
+      var pb = document.querySelector('.progress-fill'); if (pb) pb.style.backgroundColor = b.accentColor || '#0ea5e9';
+      // Logo placement
+      var logoWrap = document.querySelector('.quote-header-inner');
+      if (logoWrap) {
+        logoWrap.style.justifyContent = b.logoPlacement === 'center' ? 'center' : b.logoPlacement === 'right' ? 'flex-end' : 'flex-start';
+      }
+      // Header font on agency name
+      var hName = document.querySelector('.quote-header-name');
+      if (hName) hName.style.fontFamily = "'" + (b.headerFont || 'Inter') + "',sans-serif";
+      // Body font
+      document.body.style.fontFamily = "'" + (b.bodyFont || 'Inter') + "', 'Outfit', sans-serif";
+      // Dark mode
+      var dm = b.darkMode || 'auto';
+      if (dm === 'dark' || (dm === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark-mode');
+      } else {
+        document.documentElement.classList.remove('dark-mode');
+      }
+      document.documentElement.style.setProperty('--brand', b.accentColor || '#0ea5e9');
+    }
+
+    // Listen for postMessage from WebBuilder
+    window.addEventListener('message', function(e) {
+      if (e.data && e.data.type === 'CJX_BRANDING_UPDATE') {
+        window.cjxBranding = e.data.branding;
+        branding = e.data.branding;
+        applyBrandingLive(e.data.branding);
+      }
+    });
+
     function applyBranding(b) {
       branding = b || {};
+      window.cjxBranding = branding;
       // Dark mode
       const dm = branding.darkMode || 'auto';
       if (dm === 'dark' || (dm === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -73,6 +141,8 @@
       document.body.style.fontFamily = "'" + bodyFont + "', 'Outfit', sans-serif";
       // Accent
       document.documentElement.style.setProperty('--brand', branding.accentColor || cfg.buttonColor || cfg.primaryColor || '#0ea5e9');
+      // Apply crop styles
+      updateCropStyles(branding);
     }
 
     function contactBlock(location) {
@@ -91,7 +161,7 @@
       if (!url) return '';
       const sizes = { small: 'w-8 h-8', medium: 'w-10 h-10', large: 'w-14 h-14' };
       const cls = sizes[branding.logoSize || 'medium'] || sizes.medium;
-      return '<img src="' + esc(url) + '" alt="Logo" class="' + cls + ' rounded-lg object-cover bg-white/20 shadow" />';
+      return '<img src="' + esc(url) + '" alt="Logo" class="quote-logo ' + cls + ' rounded-lg object-cover bg-white/20 shadow" />';
     }
 
     // --- Init ---
@@ -161,27 +231,35 @@
         h += '<div class="preview-banner">Preview Mode -- Submissions Disabled</div>';
       }
       // Header
-      h += `<div class="py-5 px-6" style="background:${esc(hdrBg)};color:${esc(hdrText)};">`;
-      h += `<div class="max-w-lg mx-auto flex items-center gap-3 ${justify}">`;
+      h += `<div class="quote-header py-5 px-6" style="background:${esc(hdrBg)};color:${esc(hdrText)};">`;
+      h += `<div class="quote-header-inner max-w-lg mx-auto flex items-center gap-3 ${justify}">`;
       h += logoHtml();
-      h += `<span class="text-lg font-bold" style="font-family:'${esc(headerFont)}',sans-serif;">${esc(cfg.agencyName)}</span>`;
+      h += `<span class="quote-header-name text-lg font-bold" style="font-family:'${esc(headerFont)}',sans-serif;">${esc(cfg.agencyName)}</span>`;
       h += `</div>`;
       h += contactBlock('header');
       h += `</div>`;
       // Banner below header
+      h += `<div class="banner-below-header max-w-lg mx-auto" style="${branding.bannerBelowHeader ? '' : 'display:none;'}">`;
       if (branding.bannerBelowHeader) {
-        h += `<div class="max-w-lg mx-auto"><img src="${esc(branding.bannerBelowHeader)}" alt="" class="w-full rounded-b-lg" style="max-height:200px;object-fit:cover;" /></div>`;
+        h += `<img src="${esc(branding.bannerBelowHeader)}" alt="" class="w-full rounded-b-lg" style="max-height:200px;object-fit:cover;" />`;
+      } else {
+        h += `<img src="" alt="" class="w-full rounded-b-lg" style="max-height:200px;object-fit:cover;display:none;" />`;
       }
+      h += `</div>`;
       // Progress
       if (showProgress) {
-        h += `<div class="max-w-lg mx-auto px-6 mt-4"><div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden"><div class="progress-bar h-2 rounded-full" style="width:${progressPct()}%;background:${esc(ac)};"></div></div><p class="text-xs text-slate-400 mt-1 text-right">${progressPct()}% complete</p></div>`;
+        h += `<div class="max-w-lg mx-auto px-6 mt-4"><div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden"><div class="progress-fill progress-bar h-2 rounded-full" style="width:${progressPct()}%;background:${esc(ac)};"></div></div><p class="text-xs text-slate-400 mt-1 text-right">${progressPct()}% complete</p></div>`;
       }
       // Body
       h += `<div class="max-w-lg mx-auto px-6 py-8 fade-in">${inner}</div>`;
       // Banner above footer
+      h += `<div class="banner-above-footer max-w-lg mx-auto" style="${branding.bannerAboveFooter ? '' : 'display:none;'}">`;
       if (branding.bannerAboveFooter) {
-        h += `<div class="max-w-lg mx-auto"><img src="${esc(branding.bannerAboveFooter)}" alt="" class="w-full rounded-t-lg" style="max-height:200px;object-fit:cover;" /></div>`;
+        h += `<img src="${esc(branding.bannerAboveFooter)}" alt="" class="w-full rounded-t-lg" style="max-height:200px;object-fit:cover;" />`;
+      } else {
+        h += `<img src="" alt="" class="w-full rounded-t-lg" style="max-height:200px;object-fit:cover;display:none;" />`;
       }
+      h += `</div>`;
       // Contact in footer
       h += contactBlock('footer');
       // Footer
@@ -191,7 +269,7 @@
 
     function poweredFooter() {
       if (branding.footerText) {
-        return `<div style="text-align:center;padding:20px 0 12px;"><p class="text-xs dm-muted" style="opacity:0.7;">${esc(branding.footerText)}</p></div>`;
+        return `<div style="text-align:center;padding:20px 0 12px;"><p class="quote-footer-text text-xs dm-muted" style="opacity:0.7;">${esc(branding.footerText)}</p></div>`;
       }
       return `<div style="text-align:center;padding:20px 0 12px;"><div style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#0f172a;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,0.15);"><span style="font-size:11px;color:#94a3b8;font-weight:500;">Powered by</span><span style="letter-spacing:-0.04em;font-weight:900;font-size:13px;"><span style="color:#ffffff;">C</span><span style="color:#38bdf8;font-weight:800;">j</span><span style="color:#0ea5e9;">X</span></span></div></div>`;
     }
@@ -201,7 +279,7 @@
       const disabled = isPreview && (extra || '').includes('submitBtn');
       const opacity = disabled ? 'opacity:0.5;cursor:not-allowed;' : '';
       const disAttr = disabled ? 'disabled' : '';
-      return `<button type="button" ${disAttr} ${extra || ''} class="px-8 py-3 text-white font-semibold rounded-xl shadow-sm hover:shadow-md transition-all text-sm" style="background:${bc};${opacity}">${esc(text)}</button>`;
+      return `<button type="button" ${disAttr} ${extra || ''} class="brand-btn px-8 py-3 text-white font-semibold rounded-xl shadow-sm hover:shadow-md transition-all text-sm" style="background:${bc};${opacity}">${esc(text)}</button>`;
     }
 
     function backBtn() {
@@ -221,11 +299,11 @@
         h += `<img src="${esc(cfg.logoUrl)}" alt="Logo" class="w-20 h-20 rounded-2xl object-cover mx-auto mb-6 shadow-lg" />`;
       }
       h += `<h1 class="text-2xl font-bold dm-text mb-2" style="font-family:'${esc(headerFont)}',sans-serif;">${esc(cfg.agencyName)}</h1>`;
-      h += `<p class="dm-muted text-slate-500 mb-2" style="font-size:15px;font-weight:500;">${esc(headline)}</p>`;
-      if (subtext) h += `<p class="dm-muted text-slate-400 mb-8 text-sm max-w-sm mx-auto">${esc(subtext)}</p>`;
+      h += `<p class="welcome-headline dm-muted text-slate-500 mb-2" style="font-size:15px;font-weight:500;">${esc(headline)}</p>`;
+      if (subtext) h += `<p class="welcome-subtext dm-muted text-slate-400 mb-8 text-sm max-w-sm mx-auto">${esc(subtext)}</p>`;
       else h += `<div class="mb-8"></div>`;
       h += contactBlock('welcome');
-      h += `<div>${brandBtn(ctaLabel, 'onclick="nextStep()"')}</div>`;
+      h += `<div>${brandBtn(ctaLabel, 'onclick="nextStep()" data-welcome-cta="1"')}</div>`;
       h += `</div>`;
       shell(h, false);
     }
